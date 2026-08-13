@@ -1,0 +1,8 @@
+# Obsidian — this skill lives inside a vault, so its cruft lands here
+.obsidian/
+.trash/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

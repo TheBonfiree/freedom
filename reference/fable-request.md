@@ -6,8 +6,11 @@ access on Fable's side — so the language block has to be pasted every time.
 
 ```
 PROJECT:     <client>, <one line on what it is>
+CLIENT TIER: <n> case studies with consistent imagery / claims need legal signoff:
+             <yes|no> / approval chain includes procurement or brand review:
+             <yes|no> / <n> named clients worth listing
 GOAL:        Architecture and section plan for a <n>-section marketing site in the
-             premium agency brutalist register
+             STUDIO register (client tier above)
 WHAT I HAVE: Design language (pasted — no repo access):
              - Four fonts, four jobs: display 900 for wordmarks only / neutral sans for
                all readable copy / one italic display serif used exactly once / mono for
@@ -32,8 +35,12 @@ DELIVERABLE: architecture
 
 ```
 PROJECT:     <client>, <one line on what the product is>
+CLIENT TIER: benchmark data with a named baseline: <yes|no — name it> / claims
+             requiring footnote or disclaimer: <n> / regulatory or legal review in
+             the approval chain: <yes|no> / spec depth expected: <headline figures
+             only | full spec table | both>
 GOAL:        Architecture and section plan for a <n>-section product page in the
-             premium precision register
+             PRECISION register (client tier above)
 WHAT I HAVE: Design language (pasted — no repo access):
              - One family, two optical cuts: display above 19px, text below 17px.
                No separate heading face — the optical size IS the hierarchy
@@ -65,6 +72,10 @@ DELIVERABLE: architecture
 
 ## Field notes
 
+- **Name the tier, not the vibe.** "Premium", "high-end" and "expensive" resolve to nothing in a
+  block where every other line is a number, and Fable reads this cold with no repo access. State
+  what the tier forces onto the page — the case-study count, the footnote requirement, who signs
+  off — and the plan can act on it. Same rule as `entry.md`'s test for describing an entry sequence.
 - **One goal.** Asking for architecture and copy in the same request produces a shallow plan on
   both. Split across days.
 - **Always name a performance budget.** Without one, the plan will assume the source site's

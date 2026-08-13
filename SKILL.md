@@ -9,9 +9,14 @@ allowed-tools:
 
 # Freedom
 
-Style direction for sites that must read as expensive. Two registers, derived from live teardowns
-of two sites that solve that problem from opposite ends. Both teardowns are sourced, value by
-value, in the vault:
+Style direction for a client who has enough real proof to fill a page — eight or more case studies
+with consistent imagery, or benchmark data with a named baseline — and whose claims pass through
+legal or procurement review before they ship. That tier is the whole brief: it means footnotes are
+mandatory rather than decorative, superlatives without a citation get cut, and no section can be
+filled with placeholder to hold its shape.
+
+Two registers, derived from live teardowns of two sites that solve that problem from opposite ends.
+Both teardowns are sourced, value by value, in the vault:
 
 - STUDIO — the `Hobro-Digital-Teardown` note
 - PRECISION — the `Apple-Mac-Studio-Teardown` note

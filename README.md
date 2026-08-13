@@ -1,7 +1,13 @@
 # freedom
 
-A Claude Code skill supplying visual direction for marketing sites that must read as expensive —
-agency and studio sites, portfolios, product and hardware landing pages, spec pages.
+A Claude Code skill supplying visual direction for marketing sites built on real proof — a client
+with eight or more case studies and consistent imagery, or benchmark data with a named baseline,
+whose claims pass legal or procurement review before shipping. Agency and studio sites, portfolios,
+product and hardware landing pages, spec pages.
+
+That tier is the constraint the whole skill is shaped around: footnotes are structural rather than
+decorative, uncited superlatives get cut, and a section with nothing real to put in it gets removed
+instead of padded.
 
 It is a style direction, not a template. There is no starter code here and no components; the skill
 is a set of decisions to make before writing markup, and the reasoning for each.

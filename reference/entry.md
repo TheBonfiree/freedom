@@ -8,7 +8,7 @@ effects and `scroll-scenes.md` covers scrubbed ones; both assume the page is alr
 This file covers the moment before that.
 
 Values observed on edolus.com, 2026-08-14 at 1440×900. Sourced teardown, including what could not
-be measured: `F:\Brain\04-REFERENCE\Edolus-Teardown.md`.
+be measured: the `Edolus-Teardown` note, kept privately.
 
 ## First: most pages should not have a gate
 

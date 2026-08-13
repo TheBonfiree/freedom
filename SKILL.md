@@ -13,8 +13,10 @@ Style direction for sites that must read as expensive. Two registers, derived fr
 of two sites that solve that problem from opposite ends. Both teardowns are sourced, value by
 value, in the vault:
 
-- STUDIO — `F:\Brain\04-REFERENCE\Hobro-Digital-Teardown.md`
-- PRECISION — `F:\Brain\04-REFERENCE\Apple-Mac-Studio-Teardown.md`
+- STUDIO — the `Hobro-Digital-Teardown` note
+- PRECISION — the `Apple-Mac-Studio-Teardown` note
+
+Those teardowns are kept privately and are not distributed with this skill.
 
 **Relationship to `impeccable`:** impeccable supplies the process — phases, critique, verified
 passes. This skill supplies the visual direction those phases execute. Run both. If they

@@ -6,9 +6,8 @@ brand hue, the gradient, and the faces per project.
 STUDIO values observed on hobro.digital, PRECISION values on apple.com/ph/mac-studio, both on
 2026-08-13 at 1440×900.
 
-Set every size as a `clamp()` expression rather than fixed px, per the fluid-scale method in
-`F:\Brain\04-REFERENCE\Design-System.md`. The px values in both tables are the desktop end of
-each clamp.
+Set every size as a `clamp()` expression rather than fixed px, per the fluid-scale method. The px values
+in both tables are the desktop end of each clamp.
 
 ---
 

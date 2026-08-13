@@ -1,9 +1,8 @@
 # Fable request template
 
 For handing this direction to Fable as a planning request. Fable plans; Claude Code builds.
-Full workflow rules: `F:\Brain\04-REFERENCE\Fable-Desk-Workflow.md` — 5 requests per day, one
-goal per request, and Fable has no disk access, so the language block has to be pasted every
-time.
+Workflow constraints assumed here: a small daily request budget, one goal per request, and no disk
+access on Fable's side — so the language block has to be pasted every time.
 
 ```
 PROJECT:     <client>, <one line on what it is>

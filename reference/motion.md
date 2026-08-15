@@ -41,6 +41,12 @@ effect — a page with five fully-realised sections beats nine half-animated one
 
 - Load GSAP plugins individually; the full bundle is rarely needed. Draggable and InertiaPlugin
   are the two most often included and never used.
+- **The library column is a recipe, not a dependency.** Under a no-CDN or self-contained
+  constraint every effect above has a plain path: smooth scroll → native `scroll-behavior` and
+  nothing else, character reveals → wrap each character in a `<span>` at build time and stagger
+  with `transition-delay`, marquee → duplicated track and one `@keyframes` translate, drag gallery
+  → `overflow-x: auto` with `scroll-snap-type`, reveals → `IntersectionObserver` toggling a class.
+  The vocabulary survives; only the tooling changes.
 - Videos: AV1 in `.mp4` with an H.264 fallback, always `muted loop playsinline`, `preload`
   nothing above the fold except the hero.
 - Never autoplay the hero video on load if it is above the LCP element — poster first.

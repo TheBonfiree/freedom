@@ -47,7 +47,14 @@ Three-up image grid, 14px mono caption under each image, filter counts in the he
 panels in the DOM and reveal them rather than fetching.
 
 > Are there at least eight cases with real, consistent imagery? Below that, use a single
-> featured case instead of a grid.
+> featured case instead of a grid. Above about twelve, with the visitor arriving to *find* one
+> rather than be convinced, the grid is straining — that is CATALOGUE, `catalogue.md`.
+
+If the count stays under twelve but the visitor still arrives to browse — a photographer's series, a
+maker's shelf — this grid takes CATALOGUE's discipline: every tile the same size and crop, captions
+flat at one size, no featured item. It keeps STUDIO's ground, chapters and accent. That borrow is
+sanctioned in `SKILL.md`'s gate; going further and importing the dark ground or the filter is the
+mixing the gate forbids.
 
 ## 6. Full-bleed CTA
 
@@ -71,6 +78,12 @@ twin. Portraits numbered `[1]` onward, greyscale, on one neutral plate.
 > Are the photos shot on a single background? Mixed-source headshots destroy this section — if
 > they are mixed, crop hard to greyscale squares or drop the section.
 
+**The solo practitioner.** A one-person consultancy has no team section and usually no client list
+worth setting. Both get cut, and what replaces them is a single portrait chapter — one full-bleed
+image, the display-size caps treatment from this section applied to the person's own name, and the
+practice's terms beside it. A solo portfolio runs about six sections, not nine; that is the normal
+shape, not a thin version of the agency page.
+
 ## 9. Footer
 
 Two columns. Left: the year range as a single hyphenated numeral pair at display size
@@ -79,6 +92,41 @@ phone, email — all mono, all uppercase, separated by bullet marks — plus a r
 CTA and social icons.
 
 > Founding year to current year, hyphenated. Update it annually.
+
+## Proof, when the numbers are real
+
+SKILL.md's sixth move tells a STUDIO page with real metrics to steal PRECISION's proof form. The
+form itself is not duplicated here — read `product.md` §4 for the markup: an `<hr>` bar carrying
+its datum in `data-bar-width`, a `<figure>` splitting value from unit into separate spans, and a
+footnote marker on every claim.
+
+Three things change on the way across:
+
+- **The gradient does not come with it.** STUDIO has no gradient. The bar is the accent, hairline
+  weight, on the chapter's own ground — black on white, white on black.
+- **The figures take the display face, the units and footnotes take mono.** Value at 60px or
+  larger, unit and marker at 14px. PRECISION's split into two optical cuts has no equivalent here.
+- **It is a chapter, not a band.** Full-bleed, alternating with its neighbours like every other
+  STUDIO section, 12px gutters. Do not centre it in a column.
+
+> Are there at least three metrics with a stated source or baseline? Two reads as a boast, not a
+> proof — cut to a single figure in a headline instead.
+
+## When the content is audio, or the assets do not exist yet
+
+Five of the nine archetypes above assume video or photography. Two cases come up constantly and
+neither is a reason to abandon the register.
+
+**Audio as the payload** — a composer, a sound designer, a podcast. The clip player is a mono
+transport strip, not a rounded media widget: a play control, a hand-drawn waveform or level bar in
+the accent, the duration as a numeral, all at the mono size on the chapter's own ground. It is a
+label that plays. Audio does not count against the motion budget, but its transport still needs a
+visible focus ring and a keyboard path, and nothing on the page may depend on hearing it.
+
+**No assets yet.** Drawn substitutes are legitimate where placeholders are not: a graded field, a
+rendered bar, a type-only plate. The rule against filling a section with placeholder is about
+*claims* — invented cases, fake clients, imaginary metrics — not about a colour field standing in
+for a photograph that is genuinely being shot next week. Say which is which in the handover.
 
 ## Repetition rule
 

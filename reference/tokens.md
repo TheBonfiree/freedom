@@ -73,14 +73,17 @@ Pro Light Italic, and Akkurat Mono LL — all commercial.
 Two rules carry the whole scale:
 
 - **Negative tracking above 16px**, about −1% at display sizes and −1.5% at text sizes. The mono
-  face keeps normal tracking — it is the only thing that does.
+  face keeps normal tracking — it is the only thing that does. **Set it in `em`, never `px`:** the
+  sizes are `clamp()`, so a fixed `−1.44px` is right at one viewport width and wrong at every other.
 - **Line-height falls as size rises**: 1.2 at body, 0.88 at 60px, 0.84 at the wordmark. Display
   lines should nearly touch.
 
 ## Layout
 
-- **No max-width container. No CSS grid.** Sections are full-bleed; content is positioned per
-  section. This is deliberate — a centred 1200px column reads as a template.
+- **No max-width container, and no single page grid.** Sections are full-bleed; content is
+  positioned per section. This is deliberate — a centred 1200px column reads as a template. It is
+  *not* a ban on `display: grid` — the case grid and the footer are grids, and faking them with
+  flexbox is worse. What is banned is one column measure governing every section.
 - 12px side gutters. Type genuinely runs to the viewport edge.
 - Fixed header at 77px; its contents invert against whatever chapter is behind it.
 - **Section padding is asymmetric and hand-set.** The source runs 167px top against 191px bottom

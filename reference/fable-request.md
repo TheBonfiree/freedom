@@ -70,6 +70,56 @@ CONSTRAINTS: Performance budget: <LCP target> and <n> canvas sequences at <n>
 DELIVERABLE: architecture
 ```
 
+## Skill-maintenance request block
+
+For asking Fable to improve this skill rather than plan a client build. Two requests, sent in
+order — the audit finds what is wrong, the feature request decides what to add. Same no-repo-access
+assumption: the file list has to be pasted, with line counts, or the plan comes back proposing
+files that already exist.
+
+```
+PROJECT:     freedom — a Claude Code skill that supplies visual direction for premium
+             marketing sites. Not a template, no starter code. Four mutually exclusive
+             registers: STUDIO (loud, four fonts, black/white chapters, triggered
+             motion), PRECISION (quiet, one family in two optical cuts, near-white
+             ladder, scrubbed canvas scenes), CATALOGUE (dark ruled scaffold, flat
+             three-size type ladder, imagery carries the volume) and DIEGETIC (the page
+             as artifact — an OS or period interface; the gate never selects it).
+CLIENT TIER: Single user, no approval chain. Skill is invoked by an agent that reads
+             one reference file per task, so every file must stand alone.
+GOAL:        Audit for gaps and inconsistencies, ranked by how much each one costs a
+             build. Nothing else this request.
+WHAT I HAVE: Structure (pasted — no repo access):
+             - SKILL.md, <n> lines: register gate, routing table, the hard rule, the
+               six moves
+             - reference/<file>.md <n> lines — <register>: <what it covers>
+               <one line per reference file, with its line count and register>
+             Asymmetries I already see: <the ones you can name, so the audit spends its
+             attention elsewhere>
+CONSTRAINTS: Files stay independently readable — an agent loads one, never all. No
+             reference file past ~210 lines, except a register whose single file carries
+             its tokens, archetypes and motion together. The registers must not blur into
+             a single house style. No starter code, no component library, no named
+             typefaces.
+DELIVERABLE: audit
+```
+
+```
+PROJECT:     freedom — Claude Code skill, visual direction for premium marketing sites,
+             two registers: STUDIO (loud editorial) and PRECISION (quiet spec page).
+             Structure as pasted in my previous request.
+CLIENT TIER: Single user, no approval chain. One reference file read per task.
+GOAL:        Propose new capabilities, ranked, with the cost of each in lines and in new
+             concepts an agent must hold. Nothing else this request.
+WHAT I HAVE: The audit findings from the previous request, plus the file list above.
+             Candidate directions I have already considered, so you can rank them
+             against your own rather than repeat them: <list them>
+CONSTRAINTS: Every addition names what it replaces or shrinks — the skill does not grow
+             past ~<n> lines. New reference files must be readable alone. Nothing that
+             turns direction into a template. No dependency on a specific framework.
+DELIVERABLE: feature proposals
+```
+
 ## Field notes
 
 - **Name the tier, not the vibe.** "Premium", "high-end" and "expensive" resolve to nothing in a
@@ -87,6 +137,11 @@ DELIVERABLE: architecture
 - **PRECISION: name the frame count and tier plan up front.** "One 43-frame hero sequence at two
   tiers" is a constraint the plan can build around; leaving it open produces a plan assuming three
   scenes and 49 first-paint assets, which is unbuildable at most budgets.
+- **Maintenance: audit and features are two requests, not one.** Same rule as architecture and
+  copy — asked together, the audit degenerates into a wishlist and the features arrive unmotivated.
+  Send the audit first and feed its findings into the second request.
+- **Maintenance: paste the file list with line counts.** Without them the plan proposes files that
+  already exist, and it cannot tell which register is under-served or where the skill is heaviest.
 - **PRECISION: state whether real benchmark data with a named baseline exists.** Without it the
   proof module cannot be planned, and it is the register's centrepiece — better to learn that from
   the plan than after building the bars.

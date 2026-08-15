@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kōrero Press — Catalogue</title>
+<style>
+:root{
+  --ink:#ffffff;
+  --ink-2:#ffffff99;
+  --ground:#0e1217;
+  --rule:#ffffff4d;
+  --veil-1:#ffffff1a;
+  --plate:rgba(255,255,255,.08);
+
+  --face:"Helvetica Now Display","Inter",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  --w-ui:500;
+  --w-body:400;
+
+  --t-ui:12px;
+  --t-cap:14px;
+  --t-body:16px;
+  --lh-ui:1;
+  --lh-body:1.2;
+  --ls-ui:0.28px;
+
+  --margin:40px;
+  --top:150px;
+  --pitch:224px;
+  --gap:22px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font:var(--w-body) var(--t-body)/var(--lh-body) var(--face);
+  -webkit-font-smoothing:antialiased;
+}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+.u{font:var(--w-ui) var(--t-ui)/var(--lh-ui) var(--face);text-transform:uppercase;letter-spacing:var(--ls-ui)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:1px solid var(--ink);outline-offset:3px}
+
+/* ---- scaffold: 6 rules over the measure, never the layout grid ---- */
+.scaffold{position:fixed;inset:0;pointer-events:none;z-index:0;padding-inline:var(--margin)}
+.scaffold::before{
+  content:"";display:block;height:100%;
+  background-image:repeating-linear-gradient(to right,var(--rule) 0 1px,transparent 1px var(--pitch));
+  background-size:calc(100% + 1px) 100%;
+}
+
+.page{position:relative;z-index:1}
+
+/* ---- clipped wordmark: the one loud moment, an image not type ---- */
+.wordmark{width:100vw;margin-inline:calc(50% - 50vw);overflow:hidden;padding-block-start:28px}
+.wordmark svg{display:block;width:118%;margin-inline-start:-9%;height:auto}
+
+/* ---- nav sits ON the scaffold ---- */
+.nav{display:flex;margin-inline:var(--margin);margin-block-start:26px;position:relative;z-index:2}
+.nav a{inline-size:var(--pitch);padding:3px 11px;color:var(--ink-2);transition:background .18s ease,color .18s ease}
+.nav a[aria-current="page"],.nav a:hover,.nav a:focus-visible{
+  background:var(--plate);backdrop-filter:blur(8px);color:var(--ink)}
+
+/* ---- opening on air ---- */
+.intro{margin-inline:var(--margin);padding-block:var(--top) 34px;display:grid;
+  grid-template-columns:repeat(4,minmax(50px,1fr));gap:var(--gap)}
+.intro h1{grid-column:1 / 3;margin:0;font:var(--w-ui) var(--t-cap)/1 var(--face);
+  text-transform:uppercase;letter-spacing:var(--ls-ui)}
+.intro p{grid-column:3 / 5;margin:0;max-width:34em;color:var(--ink-2);font-size:var(--t-body)}
+
+/* ---- filter, an affordance not chrome ---- */
+.filterbar{margin-inline:var(--margin);display:flex;justify-content:flex-end;position:relative;z-index:3}
+.filter-sticky{position:sticky;top:16px;margin-inline-start:auto;pointer-events:none}
+.filter-sticky .filter-toggle{pointer-events:auto}
+.filter-toggle{background:none;border:0;color:var(--ink);cursor:pointer;padding:3px 11px;
+  font:var(--w-ui) var(--t-ui)/var(--lh-ui) var(--face);text-transform:uppercase;letter-spacing:var(--ls-ui);
+  transition:background .18s ease}
+.filter-toggle:hover{background:var(--plate);backdrop-filter:blur(8px)}
+.tags{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;margin-block-start:10px}
+.tags[hidden]{display:none}
+.tag{background:none;color:var(--ink-2);cursor:pointer;padding:3px 11px;border:1px solid var(--rule);
+  font:var(--w-ui) var(--t-ui)/var(--lh-ui) var(--face);text-transform:uppercase;letter-spacing:var(--ls-ui);
+  transition:background .18s ease,color .18s ease}
+.tag[aria-pressed="true"],.tag:hover{background:var(--plate);backdrop-filter:blur(8px);color:var(--ink)}
+
+/* ---- the grid: 4 columns against 6 rules ---- */
+.grid-wrap{position:relative;z-index:1;background:var(--ground);margin-block-end:100vh;padding-block-end:80px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(50px,1fr));gap:46px var(--gap);
+  margin-inline:var(--margin);margin-block-start:40px}
+.item{display:block}
+.item-title{font:var(--w-ui) var(--t-cap)/1.15 var(--face);text-transform:uppercase;
+  letter-spacing:var(--ls-ui);margin:0 0 12px}
+.item img{width:100%;aspect-ratio:640 / 374;object-fit:cover;border-radius:0;background:#222}
+.item-meta{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0;list-style:none;padding:0}
+.chip{font:var(--w-ui) var(--t-ui)/var(--lh-ui) var(--face);text-transform:uppercase;
+  letter-spacing:var(--ls-ui);padding:3px 11px;border:1px solid var(--rule);color:var(--ink-2)}
+.chip-id{border-color:transparent;padding-inline:0}
+
+/* reveal — 0.4s, once */
+.item{opacity:0;transform:translateY(12px);transition:opacity .4s ease,transform .4s ease}
+.item.is-in{opacity:1;transform:none}
+
+.count{margin-inline:var(--margin);margin-block-start:34px;color:var(--ink-2)}
+
+/* the one difference-blend label, crossing the imagery */
+.blend{position:absolute;mix-blend-mode:difference;color:#fff;
+  inset-block-start:-26px;inset-inline-start:0}
+.grid{position:relative}
+
+/* ---- footer as a fixed stage ---- */
+.footer{position:fixed;inset-inline:0;bottom:0;z-index:0;height:100vh;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:var(--margin);gap:18px}
+.footer .rows{display:grid;grid-template-columns:repeat(4,minmax(50px,1fr));gap:var(--gap);
+  border-block-start:1px solid var(--rule);padding-block-start:18px}
+.footer p{margin:0;color:var(--ink-2)}
+
+@media (max-width:900px){
+  :root{--pitch:33.3333%}
+  .scaffold::before{background-image:repeating-linear-gradient(to right,var(--rule) 0 1px,transparent 1px 33.3333%)}
+  .grid,.intro,.footer .rows{grid-template-columns:repeat(2,minmax(50px,1fr))}
+  .intro h1,.intro p{grid-column:auto}
+  .nav a{inline-size:auto;padding-inline:11px}
+}
+@media (max-width:700px){
+  :root{--margin:20px;--top:90px}
+  .grid,.intro,.footer .rows{grid-template-columns:1fr}
+  .nav{flex-wrap:wrap;gap:2px}
+}
+@media (prefers-reduced-motion:reduce){
+  .item{opacity:1;transform:none;transition:none}
+  .nav a,.tag,.filter-toggle{transition:none}
+  .wordmark svg{transform:none !important}
+  *{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="scaffold" aria-hidden="true"></div>
+
+<div class="page">
+
+  <div class="wordmark" aria-hidden="true">
+    <svg viewBox="0 0 1200 150" role="presentation" focusable="false">
+      <text x="0" y="118" font-family="Helvetica Neue, Arial, sans-serif" font-weight="700"
+            font-size="150" letter-spacing="-6" fill="#ffffff">KŌRERO PRESS</text>
+    </svg>
+  </div>
+
+  <nav class="nav u" aria-label="Primary">
+    <a href="#catalogue" aria-current="page">Catalogue</a>
+    <a href="#press">Press</a>
+    <a href="#rights">Rights</a>
+    <a href="#stockists">Stockists</a>
+  </nav>
+
+  <header class="intro">
+    <h1>Kōrero Press — Backlist, 34 titles in print</h1>
+    <p>An independent publisher in Te Whanganui-a-Tara Wellington. Every cover photographed by
+       Anahera Pōneke. Browse the list, or narrow it by category.</p>
+  </header>
+
+  <div class="filterbar">
+    <div class="filter-sticky">
+      <button class="filter-toggle" id="filterToggle" aria-expanded="false" aria-controls="tagList">Filter +</button>
+    </div>
+  </div>
+  <div class="filterbar">
+    <div id="tagList" class="tags" role="group" aria-label="Filter by category" hidden>
+      <button class="tag" data-cat="all" aria-pressed="true">All</button>
+      <button class="tag" data-cat="Fiction" aria-pressed="false">Fiction</button>
+      <button class="tag" data-cat="Poetry" aria-pressed="false">Poetry</button>
+      <button class="tag" data-cat="Essays" aria-pressed="false">Essays</button>
+      <button class="tag" data-cat="Translation" aria-pressed="false">Translation</button>
+      <button class="tag" data-cat="Art" aria-pressed="false">Art</button>
+    </div>
+  </div>
+
+  <p class="count u" id="count" role="status">12 of 34 titles shown</p>
+
+  <div class="grid-wrap">
+    <section class="grid" id="catalogue" aria-label="Catalogue">
+      <span class="blend u" aria-hidden="true">In print</span>
+
+      <a class="item" href="#" data-cat="Fiction">
+        <h2 class="item-title">The Long Wharf</h2>
+        <img src="https://placehold.co/640x374/222/444?text=The+Long+Wharf" alt="" width="640" height="374" loading="lazy">
+        <ul class="item-meta"><li class="chip chip-id">978-0-9951-2201-4</li><li class="chip">Fiction</li><li class="chip">Mar. 2019</li></ul>
+      </a>
+
+      <a class="item" href="#" data-cat="Poetry">
+        <h2 class="item-title">Salt Almanac</h2>
+        <img src="https://placehold.co/640x374/222/444?text=Salt+Almanac" alt="" width="640" height="374" loading="lazy">
+        <ul class="item-meta"><li class="chip chip-id">978-0-9951-2204-5</li><li class="chip">Poetry</li><li class="chip">Sep. 2019</li></ul>
+      </a>
+
+      <a class="item" href="#" data-cat="Essays">
+        <h2 class="item-title">Weather From The South</h2>
+        <img src="https://placehold.co/640x374/222/444?text=Weather+From+The+South" alt="" width="640" height="374" loading="lazy">
+        <ul class="item-meta"><li class="chip chip-id">978-0-9951-2209-0</li><li class="chip">Essays</li><li class="chip">Feb. 2020</li></ul>
+      </a>
+
+      <a class="item" href="#" data-cat="Translation">
+        <h2 class="item-title">Nine Rivers, After Bashō</h2>
+        <img src="https://placehold.co/640x374/222/444?text=Nine+Rivers" alt="" width="640" height="374" loading="lazy">
+        <ul class="item-meta"><li class="chip chip-id">978-0-9951-2213-7</li><li class="chip">Translation</li><li class="chip">Jul. 2020</li></ul>
+      </a>
+
+      <a class="item" href="#" data-cat="Art">
+        <h2 class="item-title">Concrete And Harakeke</h2>
+        <img src="https://placehold.co/640x374/222/444?text=Concrete+And+Harakeke" alt="" width="640" height="374" loading="lazy">
+        <ul class="item-meta"><li class="chip chip-id">978-0-9951-2218-2</li><li class="chip">Art</li><li class="chip">Nov. 2020</li></ul>
+      </a>
+
+      <a class="item" href="#" data-cat="Fiction">
+        <h2 class="item-title">A House On Aro Street</h2>
+        <img src="https://placehold.co/640x374/222/444?text=A+House+On+Aro+Street" alt="" width="640" height="374" loading="lazy">
+        <ul class="item-meta"><li class="chip chip-id">978-0-9951-2222-9</li><li class="chip">Fiction</li><li class="chip">Apr. 2021</li></ul>
+      </a>
+
+      <a class="item" href="#" data-cat="Poetry">
+        <h2 class="item-title">Low Tide Register</h2>
+        <img src="https://placehold.co/640x374/222/444?text=Low+Tide+Register" alt="" width="640" height="374" loading="lazy">
+        <ul class="item-meta"><li class="chip chip-id">978-0-9951-2227-4</li><li class="chip">Poetry</li><li class="chip">Oct. 2021</li></ul>
+      </a>
+
+      <a class="item" href="#" data-cat="Essays">
+        <h2 class="item-title">Notes On Borrowed Ground</h2>
+        <img src="https://placehold.co/640x374/222/444?text=Notes+On+Borrowed+Ground" alt="" width="640" height="374" loading="lazy">
+        <ul class="item-meta"><li class="chip chip-id">978-0-9951-2231-1</li><li class="chip">Essays</li><li class="chip">Mar. 2022</li></ul>
+      </a>
+
+      <a class="item" href="#" data-cat="Translation">
+        <h2 class="item-title">The Cold Coast Letters</h2>
+        <img src="https://placehold.co/640x374/222/444?text=The+Cold+Coast+Letters" alt="" width="640" height="374" loading="lazy">
+        <ul class="item-meta"><li class="chip chip-id">978-0-9951-2236-6</li><li class="chip">Translation</li><li class="chip">Aug. 2022</li></ul>
+      </a>
+
+      <a class="item" href="#" data-cat="Art">
+        <h2 class="item-title">Forty Windows</h2>
+        <img src="https://placehold.co/640x374/222/444?text=Forty+Windows" alt="" width="640" height="374" loading="lazy">
+        <ul class="item-meta"><li class="chip chip-id">978-0-9951-2240-3</li><li class="chip">Art</li><li class="chip">Feb. 2023</li></ul>
+      </a>
+
+      <a class="item" href="#" data-cat="Fiction">
+        <h2 class="item-title">Southerly, Later</h2>
+        <img src="https://placehold.co/640x374/222/444?text=Southerly+Later" alt="" width="640" height="374" loading="lazy">
+        <ul class="item-meta"><li class="chip chip-id">978-0-9951-2245-8</li><li class="chip">Fiction</li><li class="chip">Sep. 2023</li></ul>
+      </a>
+
+      <a class="item" href="#" data-cat="Poetry">
+        <h2 class="item-title">Karori Elegies</h2>
+        <img src="https://placehold.co/640x374/222/444?text=Karori+Elegies" alt="" width="640" height="374" loading="lazy">
+        <ul class="item-meta"><li class="chip chip-id">978-0-9951-2251-9</li><li class="chip">Poetry</li><li class="chip">May 2024</li></ul>
+      </a>
+
+    </section>
+  </div>
+
+</div>
+
+<footer class="footer" id="stockists">
+  <div class="rows u">
+    <p>Kōrero Press<br>12 Ghuznee Street<br>Te Aro, Wellington 6011</p>
+    <p>Covers photographed by<br>Anahera Pōneke</p>
+    <p>Rights &amp; permissions<br>rights@koreropress.nz</p>
+    <p>34 titles in print<br>Est. 2016</p>
+  </div>
+</footer>
+
+<noscript>
+  <style>.item{opacity:1;transform:none}.tags{display:flex !important}</style>
+</noscript>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var items = Array.prototype.slice.call(document.querySelectorAll('.item'));
+  var toggle = document.getElementById('filterToggle');
+  var list = document.getElementById('tagList');
+  var count = document.getElementById('count');
+
+  /* reveal — effect 3 of 4, branched in JS because the CSS query cannot see it */
+  if (reduce || !('IntersectionObserver' in window)) {
+    items.forEach(function(i){ i.classList.add('is-in'); });
+  } else {
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('is-in'); io.unobserve(e.target); } });
+    }, {rootMargin:'0px 0px -8% 0px'});
+    items.forEach(function(i){ io.observe(i); });
+  }
+
+  toggle.addEventListener('click', function(){
+    var open = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!open));
+    list.hidden = open;
+    toggle.textContent = open ? 'Filter +' : 'Filter −';
+  });
+
+  list.addEventListener('click', function(e){
+    var btn = e.target.closest('.tag');
+    if (!btn) return;
+    var cat = btn.dataset.cat;
+    list.querySelectorAll('.tag').forEach(function(t){
+      t.setAttribute('aria-pressed', String(t === btn));
+    });
+    var shown = 0;
+    items.forEach(function(i){
+      var match = (cat === 'all' || i.dataset.cat === cat);
+      i.style.display = match ? '' : 'none';
+      if (match) { shown++; if (reduce) i.classList.add('is-in'); }
+    });
+    count.textContent = shown + (cat === 'all' ? ' of 34 titles shown' : ' of 34 titles shown — ' + cat);
+  });
+})();
+</script>
+</body>
+</html>

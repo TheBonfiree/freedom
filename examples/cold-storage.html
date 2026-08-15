@@ -1,0 +1,967 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cold Storage — data recovery from obsolete media, Rotterdam</title>
+<meta name="description" content="Cold Storage recovers data from 8-inch floppies, DAT, Zip, SyQuest, LTO and failing drives. Rotterdam.">
+<style>
+/* ───────────────────────────────────────────────────────────────
+   DIEGETIC register — artifact: MS-DOS 3.3, amber phosphor, 1988.
+   Material: phosphor glow on box-drawing rules. Radius 0 everywhere.
+   ─────────────────────────────────────────────────────────────── */
+:root {
+  --ground:  #0b0906;   /* phosphor black */
+  --amber:   #ffb000;   /* the face colour: all chrome, all labels */
+  --bright:  #ffd894;   /* highlight — headings inside a viewer */
+  --dim:     #8a5e00;   /* rules and inactive chrome only, never text */
+  --sel-bg:  #ffb000;   /* selection inverts */
+  --sel-ink: #0b0906;
+  --bar:     #1c1206;   /* status and menu bars */
+  --ui: ui-monospace, "Cascadia Mono", Consolas, "DejaVu Sans Mono", "Courier New", monospace;
+
+  --t-ui: 14px;         /* every piece of chrome */
+  --t-prose: 15px;      /* the one place legibility beats the costume */
+  --ls: 0.02em;         /* positive — period faces open up */
+  --cell: 22px;         /* one character cell of vertical rhythm */
+  --cell-h: 11px;       /* half cell — binds a heading to what it introduces */
+  --cell-q: 6px;        /* quarter cell — the chrome's own unit */
+}
+
+/* plain layer palette, defined here so nothing lives only in a toggle */
+:root {
+  --p-ground: #f7f6f3;
+  --p-ink:    #16130e;
+  --p-rule:   #d9d5cc;
+  --p-accent: #7a4a00;
+  --p-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--ground);
+  color: var(--amber);
+  font: var(--t-ui)/1.5 var(--ui);
+  letter-spacing: var(--ls);
+  overflow-x: hidden;              /* the artifact never scrolls sideways */
+}
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--bright); outline-offset: 2px; }
+
+/* ── screen ─────────────────────────────────────────────────── */
+.screen {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  max-inline-size: 1180px;
+  margin-inline: auto;
+  padding: 0;
+}
+
+/* ── menu bar ───────────────────────────────────────────────── */
+.menubar {
+  background: var(--bar);
+  border-block-end: 1px solid var(--dim);
+  padding: var(--cell-q) 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--cell-q) * 3);
+  text-transform: uppercase;
+}
+.menubar b { font-weight: 400; color: var(--bright); }
+.menubar .spacer { margin-inline-start: auto; }
+
+/* ── banner ─────────────────────────────────────────────────── */
+.banner {
+  padding: calc(var(--cell-q) * 3) 12px calc(var(--cell-q) * 2);
+  border-block-end: 1px solid var(--dim);
+}
+.banner pre {
+  margin: 0;
+  font: 400 clamp(6px, 1.35vw, 13px)/1.05 var(--ui);
+  color: var(--amber);
+  letter-spacing: 0;
+  white-space: pre;
+  overflow: hidden;
+}
+.banner h1 {
+  margin: calc(var(--cell-q) * 2) 0 0;
+  font: 400 var(--t-ui)/1.4 var(--ui);
+  letter-spacing: var(--ls);
+  text-transform: uppercase;
+  color: var(--bright);
+}
+.banner p { margin: 2px 0 0; color: var(--amber); }
+
+/* ── panels ─────────────────────────────────────────────────── */
+.panels {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 0;
+  min-block-size: 0;
+}
+.panel { border-inline-end: 1px solid var(--dim); padding: 0 0 var(--cell); }
+.panel:last-child { border-inline-end: 0; }
+.panel-head {
+  padding: 6px 12px;
+  border-block-end: 1px solid var(--dim);
+  text-transform: uppercase;
+  color: var(--bright);
+}
+.panel-head .count { color: var(--amber); }
+
+/* file list — one tab stop, arrow keys move (roving tabindex) */
+.filelist { list-style: none; margin: 0; padding: 6px 0; }
+.filelist li { margin: 0; }
+.fileitem {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  inline-size: 100%;
+  text-align: start;
+  background: none;
+  border: 0;
+  color: var(--amber);
+  font: inherit;
+  letter-spacing: inherit;
+  padding: 2px 12px;
+  cursor: pointer;
+}
+.fileitem:hover { background: rgba(255,176,0,.12); }
+.fileitem[aria-selected="true"] { background: var(--sel-bg); color: var(--sel-ink); }
+.fileitem .size { opacity: .75; }
+.fileitem[aria-selected="true"] .size { opacity: 1; }
+
+/* ── viewer ─────────────────────────────────────────────────── */
+/* the viewer takes the whole column; the prose keeps its own measure below */
+.viewer { padding: var(--cell) 24px calc(var(--cell) * 2); }
+/* the document title reads like the file-list selection: same inverse bar,
+   same meaning — "you are here" */
+.viewer h2 {
+  margin: 0 0 var(--cell-h);
+  padding: 2px 8px;
+  background: var(--sel-bg);
+  color: var(--sel-ink);
+  font: 400 var(--t-ui)/1.4 var(--ui);
+  letter-spacing: var(--ls);
+  text-transform: uppercase;
+}
+.viewer h3 {
+  margin: calc(var(--cell) * 1.5) 0 var(--cell-h);
+  font: 400 var(--t-ui)/1.4 var(--ui);
+  letter-spacing: var(--ls);
+  text-transform: uppercase;
+  color: var(--bright);
+}
+.viewer h3::before { content: "── "; color: var(--dim); }
+.viewer p, .viewer li { font-size: var(--t-prose); line-height: 1.6; }
+.viewer p { margin: 0 0 var(--cell); max-inline-size: 68ch; }
+.viewer ul { margin: 0 0 var(--cell); padding-inline-start: 2ch; list-style: none; }
+.viewer ul li { position: relative; margin-block-end: 6px; }
+.viewer ul li::before { content: "·"; position: absolute; inset-inline-start: -2ch; }
+/* the rule confirms a break the spacing has already made, rather than making it */
+.rule { border: 0; border-block-start: 1px solid var(--dim); margin: calc(var(--cell) * 2) 0; }
+
+/* fixed tracks, so repeated meta blocks wrap identically regardless of string
+   length — four case records, four equal shapes */
+.meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 4px calc(var(--cell-q) * 3);
+  margin: 0 0 var(--cell);
+  text-transform: uppercase;
+}
+.meta span { white-space: nowrap; }
+/* metadata belongs to the prose above it, not to the gap between blocks */
+p + .meta, ul + .meta { margin-block-start: calc(var(--cell-h) - var(--cell)); }
+.meta b { font-weight: 400; color: var(--bright); }
+
+table { border-collapse: collapse; inline-size: 100%; margin-block-end: var(--cell); }
+th, td { text-align: start; padding: 4px 12px 4px 0; border-block-end: 1px solid var(--dim); font-weight: 400; }
+th { text-transform: uppercase; }
+.screen th { color: var(--bright); }
+td.num { text-align: end; padding-inline-end: 0; }
+
+.fn { font-size: 12px; text-decoration: none; vertical-align: super; }
+.footnotes { font-size: 13px; }
+.footnotes li { margin-block-end: 6px; }
+
+/* ── status bar ─────────────────────────────────────────────── */
+.statusbar {
+  position: sticky;
+  bottom: 0;
+  background: var(--bar);
+  border-block-start: 1px solid var(--dim);
+  padding: 6px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+.key {
+  background: none;
+  border: 0;
+  color: var(--amber);
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.key b { font-weight: 400; color: var(--sel-ink); background: var(--sel-bg); padding: 0 4px; }
+.key:hover { color: var(--bright); }
+.statusbar .clock { margin-inline-start: auto; color: var(--bright); }
+.led { display: inline-block; inline-size: 8px; block-size: 8px; background: var(--dim); }
+.led.on { background: var(--amber); }
+
+/* ── caret ──────────────────────────────────────────────────── */
+.caret {
+  display: inline-block;
+  inline-size: 9px; block-size: 15px;
+  background: var(--amber);
+  vertical-align: -3px;
+  animation: blink 1.06s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ── screensaver ────────────────────────────────────────────── */
+.saver {
+  position: fixed; inset: 0; z-index: 50;
+  background: #000;
+  display: none;
+  place-items: center;
+  color: var(--amber);
+}
+.saver.on { display: grid; }
+.saver pre { margin: 0; font: 400 12px/1.1 var(--ui); animation: drift 9s ease-in-out infinite alternate; }
+@keyframes drift { from { transform: translate(-14vw, -8vh); } to { transform: translate(14vw, 8vh); } }
+
+/* ── plain layer ────────────────────────────────────────────── */
+.plain { display: none; background: var(--p-ground); color: var(--p-ink); font-family: var(--p-ui); }
+body.plain-on { background: var(--p-ground); color: var(--p-ink); }
+body.plain-on .screen { display: none; }
+body.plain-on .plain { display: block; }
+.plain-inner { max-inline-size: 68ch; margin-inline: auto; padding: 48px 24px 96px; }
+.plain h1 { font-size: 30px; line-height: 1.2; margin: 0 0 8px; letter-spacing: -0.01em; }
+.plain h2 { font-size: 20px; line-height: 1.3; margin: 40px 0 8px; letter-spacing: -0.005em; }
+.plain h3 { font-size: 16px; margin: 24px 0 4px; }
+.plain p, .plain li { font-size: 16px; line-height: 1.65; }
+.plain a { color: var(--p-accent); }
+.plain ul { margin: 0 0 24px; padding-inline-start: 20px; }
+.plain ul li { margin-block-end: 4px; }
+.plain .footnotes { margin: 40px 0 0; padding-inline-start: 20px; font-size: 14px; color: #5b554a; }
+.plain hr { border: 0; border-block-start: 1px solid var(--p-rule); margin: 40px 0; }
+.plain .lede { font-size: 18px; }
+.plain table th, .plain table td { border-block-end: 1px solid var(--p-rule); padding: 8px 12px 8px 0; }
+.plain .back {
+  font: 500 15px/1 var(--p-ui);
+  background: var(--p-ink); color: var(--p-ground);
+  border: 0; padding: 12px 16px; cursor: pointer; margin-block-start: 40px;
+}
+.plain .note { font-size: 14px; color: #5b554a; }
+
+/* ── small end ──────────────────────────────────────────────── */
+@media (max-width: 780px) {
+  .panels { grid-template-columns: 1fr; }
+  .panel { border-inline-end: 0; border-block-end: 1px solid var(--dim); }
+  .viewer { padding-inline: 12px; }
+  .statusbar { font-size: 13px; gap: calc(var(--cell-q) * 2); }
+
+  /* a ledger read down, not across: the figure gets its own line rather than
+     letting one long Item wrap and double that row's height */
+  .ledger thead { position: absolute; inline-size: 1px; block-size: 1px;
+                  overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .ledger tr { display: block; padding-block: var(--cell-h); }
+  .ledger tr + tr { border-block-start: 1px solid var(--dim); }
+  .ledger td { display: block; border: 0; padding: 0; }
+  .ledger td.num { text-align: start; color: var(--bright); }
+  .ledger td[data-label]::before {
+    content: attr(data-label) " ";
+    color: var(--dim-ink, var(--amber)); opacity: .7; text-transform: uppercase;
+  }
+}
+
+/* the ASCII wordmark stops being a wordmark once it hits its 6px floor */
+@media (max-width: 480px) {
+  .banner pre { display: none; }
+}
+
+/* the file list stays a period file list; it just gets a target you can hit */
+@media (pointer: coarse) {
+  .fileitem { padding-block: var(--cell-h); }
+}
+
+/* ═══ the tube ═══════════════════════════════════════════════
+   The text underneath stays real DOM text — the phosphor composites
+   over it, so nothing here costs legibility or selection.
+   ═══════════════════════════════════════════════════════════ */
+.tube {
+  position: fixed; inset: 0; z-index: 60;
+  pointer-events: none;
+  display: none;                      /* only exists once JS lights it */
+  mix-blend-mode: screen;
+}
+body.tube-on .tube { display: block; }
+.tube canvas { inline-size: 100%; block-size: 100%; display: block; }
+
+/* the glass in front of the phosphor: a vignette and a corner curve.
+   Multiplies, so it darkens the edges instead of veiling the middle. */
+.glass {
+  position: fixed; inset: 0; z-index: 61;
+  pointer-events: none; display: none;
+  mix-blend-mode: multiply;
+  background:
+    radial-gradient(122% 118% at 50% 50%, #fff 58%, #c9c9c9 82%, #6f6f6f 100%);
+}
+body.tube-on .glass { display: block; }
+
+/* power-on: the beam opens from a horizontal line to a full raster.
+   Runs once, on the artifact only, and only when JS and motion allow. */
+body.booting .screen {
+  animation: raster-open .62s cubic-bezier(.16, .84, .3, 1) both;
+  transform-origin: 50% 50%;
+}
+@keyframes raster-open {
+  0%   { transform: scaleY(.004) scaleX(1.04); filter: brightness(3.4); opacity: .9; }
+  42%  { transform: scaleY(.055) scaleX(1.02); filter: brightness(2.1); }
+  100% { transform: none; filter: none; opacity: 1; }
+}
+
+/* beam collapse: the artifact goes back to a line before the plain
+   document takes over, and opens again on the way back */
+body.collapsing .screen { animation: raster-close .3s cubic-bezier(.7, 0, .84, 0) both; }
+@keyframes raster-close {
+  0%   { transform: none; filter: none; }
+  100% { transform: scaleY(.003) scaleX(1.05); filter: brightness(4); opacity: .85; }
+}
+
+/* the boot line arrives at a plausible baud rate. The text is never removed
+   from the DOM — this is a clip, so screen readers and find-in-page see the
+   whole string from the first frame. Single-line widths only. */
+@media (min-width: 781px) {
+  body.typing .banner p {
+    inline-size: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    animation: baud 1.15s steps(58, end) forwards;
+  }
+}
+@keyframes baud { to { inline-size: 58ch; } }
+
+/* ── reduced motion: every effect above has a fallback ──────── */
+@media (prefers-reduced-motion: reduce) {
+  .caret { animation: none; }              /* solid block, still a caret */
+  .saver, .saver.on { display: none; }     /* never fires at all */
+  .saver pre { animation: none; }
+  .led.on { background: var(--amber); }    /* no flicker, just lit */
+  /* the tube stops moving but the glass stays: a still phosphor screen is
+     the artifact; a rolling beam is the part that makes people ill */
+  body.booting .screen, body.collapsing .screen { animation: none; }
+  body.typing .banner p { inline-size: auto; animation: none; }
+  * { transition: none !important; }
+}
+
+/* no-JS: everything is already in the HTML, so show it all */
+.no-js .panels { grid-template-columns: 1fr; }
+.no-js .panel:first-child { display: none; }
+.no-js .doc { display: block !important; }
+.no-js .doc + .doc { border-block-start: 1px solid var(--dim); margin-block-start: var(--cell); padding-block-start: var(--cell); }
+.no-js .statusbar .key { display: none; }
+</style>
+</head>
+<body>
+
+<div class="tube" aria-hidden="true"><canvas></canvas></div>
+<div class="glass" aria-hidden="true"></div>
+
+<div class="screen">
+
+  <!-- menu bar: decoration + orientation. Real nav lives in the file list. -->
+  <div class="menubar">
+    <span><b>Cold Storage</b> · Data Recovery</span>
+    <span aria-hidden="true">C:\CSTORAGE&gt;</span>
+    <span class="spacer">Rotterdam · NL</span>
+  </div>
+
+  <header class="banner">
+    <pre aria-hidden="true">█████ █████ █     ████    █████ █████ █████ ████  █████ █████ █████
+█     █   █ █     █   █   █       █   █   █ █   █ █   █ █     █
+█     █   █ █     █   █   █████   █   █   █ ████  █████ █  ██ ████
+█     █   █ █     █   █       █   █   █   █ █  █  █   █ █   █ █
+█████ █████ █████ ████    █████   █   █████ █   █ █   █ █████ █████</pre>
+    <h1>Cold Storage — recovery from obsolete and failing media</h1>
+    <p>8-inch floppy · DAT · Zip · SyQuest · LTO · failing drives<span class="caret" aria-hidden="true"></span></p>
+  </header>
+
+  <div class="panels">
+
+    <!-- LEFT PANEL: the file list. One tab stop, arrows to move, Enter opens. -->
+    <nav class="panel" aria-label="Documents">
+      <div class="panel-head">C:\CSTORAGE <span class="count">[6]</span></div>
+      <ul class="filelist" role="listbox" aria-label="Documents" id="files">
+        <li role="none"><button class="fileitem" role="option" id="opt-readme"   aria-selected="true"  data-doc="readme"   tabindex="0">README.TXT<span class="size">2K</span></button></li>
+        <li role="none"><button class="fileitem" role="option" id="opt-services" aria-selected="false" data-doc="services" tabindex="-1">SERVICES.DOC<span class="size">6K</span></button></li>
+        <li role="none"><button class="fileitem" role="option" id="opt-cases"    aria-selected="false" data-doc="cases"    tabindex="-1">CASES.LOG<span class="size">9K</span></button></li>
+        <li role="none"><button class="fileitem" role="option" id="opt-rates"    aria-selected="false" data-doc="rates"    tabindex="-1">RATES.TAB<span class="size">3K</span></button></li>
+        <li role="none"><button class="fileitem" role="option" id="opt-intake"   aria-selected="false" data-doc="intake"   tabindex="-1">INTAKE.TXT<span class="size">4K</span></button></li>
+        <li role="none"><button class="fileitem" role="option" id="opt-contact"  aria-selected="false" data-doc="contact"  tabindex="-1">CONTACT.TXT<span class="size">1K</span></button></li>
+      </ul>
+    </nav>
+
+    <!-- RIGHT PANEL: the viewer. Every document is in the HTML; JS only hides. -->
+    <main class="panel viewer" id="viewer" tabindex="-1">
+
+      <!-- SELF-DECLARATION: the first thing anyone reads. -->
+      <article class="doc" id="doc-readme">
+        <h2>README.TXT</h2>
+        <p><b>Yes — this is a 1988 file browser, art-directed in 2026.</b> Cold Storage recovers
+        data from media of exactly this vintage, so the interface is not a costume over the work;
+        it is the work, running. Nothing here is broken.</p>
+        <p>If you would rather just read the information, press
+        <button class="key" data-action="plain" type="button"><b>F9</b> Plain view</button> at any
+        time. Everything on this screen is there, set as an ordinary document, and you can come
+        back.</p>
+        <hr class="rule">
+        <p>We are a four-person lab on the Maashaven, Rotterdam. We image failing and obsolete
+        media, recover what is on them, and hand back files that open in software you already have.
+        We do not sell storage, and we do not take work we cannot do — the assessment tells you
+        which of those you are looking at, and it is free.</p>
+        <div class="meta">
+          <span><b>Est.</b> 2011</span>
+          <span><b>Lab</b> Maashaven O.Z., Rotterdam</span>
+          <span><b>Turnaround</b> 5–15 working days</span>
+          <span><b>Assessment</b> free</span>
+        </div>
+        <p>Use the list on the left, or the keys along the bottom. Arrow keys move, Enter opens.</p>
+      </article>
+
+      <article class="doc" id="doc-services" hidden>
+        <h2>SERVICES.DOC</h2>
+        <p>Six intake categories. Each begins with the same free assessment: we inspect the medium,
+        report what is physically recoverable, and quote before any work starts.</p>
+
+        <h3>[1] 8-inch, 5.25-inch and 3.5-inch floppy imaging</h3>
+        <p>Flux-level imaging on calibrated drives, including hard-sectored and CP/M formats, and
+        soft-sectored disks written by controllers that no longer exist. Output is a flux archive
+        plus a filesystem extraction where one can be resolved.</p>
+
+        <h3>[2] DAT, DDS and Exabyte tape</h3>
+        <p>Cleaned transports, replacement drive heads and per-block retry. Audio DAT and data DDS
+        are different problems and are quoted separately.</p>
+
+        <h3>[3] Zip, Jaz, SyQuest and MO cartridges</h3>
+        <p>Including click-of-death Zip cartridges, where the drive is the failure and the medium
+        is usually intact.</p>
+
+        <h3>[4] LTO-1 through LTO-9</h3>
+        <p>Generational reads across a maintained drive set, plus recovery from tapes written by
+        backup software whose vendor is gone. Catalogue reconstruction where the index is lost.</p>
+
+        <h3>[5] Failing hard drives</h3>
+        <p>Head-stack replacement and platter transfer in a class-100 bench, for drives that still
+        spin and drives that do not. We do not attempt a second entry on a platter set we have
+        already opened without telling you first.</p>
+
+        <h3>[6] Optical rot</h3>
+        <p>CD-R and DVD-R with degraded dye layers, read at reduced speed across multiple drives
+        and reconciled sector by sector.</p>
+      </article>
+
+      <article class="doc" id="doc-cases" hidden>
+        <h2>CASES.LOG</h2>
+        <p>Four jobs, with what was on the shelf when they arrived and what came back. Figures are
+        from our own job log<a class="fn" href="#fn1" id="fnref1" aria-label="Footnote 1">[1]</a>.</p>
+
+        <hr class="rule">
+        <div class="meta">
+          <span><b>Job</b> CS-2024-041</span>
+          <span><b>Medium</b> 8-inch CP/M floppy ×34</span>
+          <span><b>Closed</b> Apr 2024</span>
+        </div>
+        <p><b>Municipal survey, 1987.</b> Thirty-four disks from a housing survey, stored in a damp
+        basement. Twenty-nine imaged on the first pass; four after a bake; one lost to substrate
+        separation. The city now has the only readable copy of its own survey.</p>
+
+        <hr class="rule">
+        <div class="meta">
+          <span><b>Job</b> CS-2024-118</span>
+          <span><b>Medium</b> DAT (DDS-2) ×212</span>
+          <span><b>Closed</b> Nov 2024</span>
+        </div>
+        <p><b>Regional broadcaster, 1994–1998.</b> Two hundred and twelve tapes with no surviving
+        catalogue. We rebuilt the index from block headers and returned it as a spreadsheet
+        alongside the audio, which is the part the client actually needed.</p>
+
+        <hr class="rule">
+        <div class="meta">
+          <span><b>Job</b> CS-2025-009</span>
+          <span><b>Medium</b> SyQuest 44 MB ×16</span>
+          <span><b>Closed</b> Feb 2025</span>
+        </div>
+        <p><b>Architecture practice, 1993.</b> Sixteen cartridges of drawings for a building now
+        undergoing conservation. Fifteen read clean; the sixteenth needed a donor drive sourced
+        from a collector in Utrecht.</p>
+
+        <hr class="rule">
+        <div class="meta">
+          <span><b>Job</b> CS-2025-067</span>
+          <span><b>Medium</b> LTO-2 ×8</span>
+          <span><b>Closed</b> Jun 2025</span>
+        </div>
+        <p><b>University research set, 2004.</b> Eight tapes written by a backup product
+        discontinued in 2009. We read the raw blocks and wrote a parser for its container format;
+        the parser is with the department, under their own licence.</p>
+
+        <hr class="rule">
+        <ol class="footnotes">
+          <li id="fn1">Disk, tape and cartridge counts are taken from our job log for the four jobs
+          described. They are not an aggregate recovery rate, and we do not publish one — the
+          honest number depends entirely on the medium and its storage history.
+          <a href="#fnref1" aria-label="Back to reference 1">↩</a></li>
+        </ol>
+      </article>
+
+      <article class="doc" id="doc-rates" hidden>
+        <h2>RATES.TAB</h2>
+        <p>Published because being quoted after the fact is the worst part of this trade. All
+        figures exclude VAT. Assessment is free and is not a deposit.</p>
+        <table class="ledger">
+          <thead>
+            <tr><th scope="col">Item</th><th scope="col">Basis</th><th scope="col" class="num">EUR</th></tr>
+          </thead>
+          <tbody>
+            <tr><td data-label="Item">Assessment and written report</td><td data-label="Basis">per intake</td><td class="num" data-label="EUR">0</td></tr>
+            <tr><td data-label="Item">Floppy imaging, 3.5" / 5.25"</td><td data-label="Basis">per disk</td><td class="num" data-label="EUR">18</td></tr>
+            <tr><td data-label="Item">Floppy imaging, 8"</td><td data-label="Basis">per disk</td><td class="num" data-label="EUR">34</td></tr>
+            <tr><td data-label="Item">Tape read, DAT / DDS / LTO</td><td data-label="Basis">per tape</td><td class="num" data-label="EUR">55</td></tr>
+            <tr><td data-label="Item">Cartridge read, Zip / Jaz / SyQuest</td><td data-label="Basis">per cartridge</td><td class="num" data-label="EUR">40</td></tr>
+            <tr><td data-label="Item">Bench work, drives</td><td data-label="Basis">per hour</td><td class="num" data-label="EUR">95</td></tr>
+            <tr><td data-label="Item">Class-100 platter transfer</td><td data-label="Basis">per drive</td><td class="num" data-label="EUR">480</td></tr>
+            <tr><td data-label="Item">Format reverse-engineering</td><td data-label="Basis">per day</td><td class="num" data-label="EUR">620</td></tr>
+            <tr><td data-label="Item">Rush handling</td><td data-label="Basis">surcharge</td><td class="num" data-label="EUR">+40%</td></tr>
+          </tbody>
+        </table>
+        <p>Volume above fifty units is quoted per job, not per unit. If we cannot recover anything,
+        you pay the bench hours already agreed and nothing else.</p>
+      </article>
+
+      <article class="doc" id="doc-intake" hidden>
+        <h2>INTAKE.TXT</h2>
+        <h3>Before you send anything</h3>
+        <ul>
+          <li>Stop using the medium. A drive that is failing gets worse every time it spins.</li>
+          <li>Do not run consumer recovery software against a disk you care about. It writes.</li>
+          <li>Do not freeze drives. That advice is from a different decade and it was wrong then.</li>
+          <li>If a disk is wet, keep it wet and tell us. Drying it is what destroys it.</li>
+        </ul>
+        <h3>What to send</h3>
+        <ul>
+          <li>The medium, packed so it cannot move inside the box.</li>
+          <li>Anything you know about what wrote it — machine, software, year, operating system.</li>
+          <li>What you actually need back. "Everything" is a valid answer but a slower one.</li>
+        </ul>
+        <h3>What comes back</h3>
+        <ul>
+          <li>The original medium, in the condition we received it, unless you tell us otherwise.</li>
+          <li>A flux or block-level archive, which is the thing that outlives us both.</li>
+          <li>Extracted files in a current format, with a manifest and checksums.</li>
+          <li>A written report on what was unreadable, and why.</li>
+        </ul>
+      </article>
+
+      <article class="doc" id="doc-contact" hidden>
+        <h2>CONTACT.TXT</h2>
+        <p>Write first. We will tell you whether to send anything before you post an irreplaceable
+        object to a stranger.</p>
+        <div class="meta">
+          <span><b>Email</b> <a href="mailto:intake@coldstorage.example">intake@coldstorage.example</a></span>
+          <span><b>Tel</b> +31 10 000 0000</span>
+        </div>
+        <p>Maashaven Oostzijde 1<br>3072 HS Rotterdam<br>Netherlands</p>
+        <p>Bench hours Tuesday to Friday, 09:00–17:00 CET. Intake by appointment; there is no
+        counter and knocking will not summon anyone.</p>
+      </article>
+
+    </main>
+  </div>
+
+  <!-- status bar: the escape hatch lives here, dressed as a function key -->
+  <div class="statusbar">
+    <button class="key" data-action="prev" type="button"><b>F5</b> Prev</button>
+    <button class="key" data-action="next" type="button"><b>F6</b> Next</button>
+    <button class="key" data-action="plain" type="button"><b>F9</b> Plain view</button>
+    <span aria-hidden="true"><span class="led" id="led"></span> drive</span>
+    <span class="clock" id="clock" aria-hidden="true">--:--</span>
+  </div>
+</div>
+
+<!-- screensaver: idle only, never under reduced motion, never steals focus -->
+<div class="saver" id="saver" aria-hidden="true">
+  <pre>  ▄████▄   ▒█████   ██▓    ▓█████▄
+ ▒██▀ ▀█  ▒██▒  ██▒▓██▒    ▒██▀ ██▌
+ ▒▓█    ▄ ▒██░  ██▒▒██░    ░██   █▌
+ ▒▓▓▄ ▄██▒▒██   ██░▒██░    ░▓█▄   ▌
+ ▒ ▓███▀ ░░ ████▓▒░░██████▒░▒████▓
+
+        C O L D   S T O R A G E
+     move the mouse or press a key</pre>
+</div>
+
+<!-- ── the plain reading: same content, ordinary document ─────────────── -->
+<div class="plain" id="plain">
+  <div class="plain-inner">
+    <h1>Cold Storage</h1>
+    <p class="lede">We recover data from obsolete and failing media — 8-inch floppies, DAT and LTO
+    tape, Zip, Jaz and SyQuest cartridges, optical discs with degraded dye layers, and hard drives
+    that no longer spin. Four-person lab on the Maashaven, Rotterdam, since 2011.</p>
+    <p class="note">This is the plain reading of the same site. The terminal version is not a
+    gimmick over different content — it holds exactly what is below.</p>
+    <button class="back" data-action="terminal" type="button">← Return to the terminal</button>
+
+    <hr>
+    <h2>Services</h2>
+    <h3>Floppy imaging, 8-inch to 3.5-inch</h3>
+    <p>Flux-level imaging on calibrated drives, including hard-sectored and CP/M formats. You get a
+    flux archive plus a filesystem extraction where one can be resolved.</p>
+    <h3>DAT, DDS and Exabyte tape</h3>
+    <p>Cleaned transports, replacement heads, per-block retry. Audio DAT and data DDS are different
+    problems and are quoted separately.</p>
+    <h3>Zip, Jaz, SyQuest and MO</h3>
+    <p>Including click-of-death Zip cartridges, where the drive is the failure and the cartridge is
+    usually intact.</p>
+    <h3>LTO-1 to LTO-9</h3>
+    <p>A maintained drive set across generations, plus recovery from backup formats whose vendor is
+    gone, and catalogue reconstruction where the index is lost.</p>
+    <h3>Failing hard drives</h3>
+    <p>Head-stack replacement and platter transfer in a class-100 bench, for drives that still spin
+    and drives that do not.</p>
+    <h3>Optical rot</h3>
+    <p>CD-R and DVD-R read at reduced speed across multiple drives and reconciled sector by sector.</p>
+
+    <hr>
+    <h2>Recent work</h2>
+    <p>Figures below are from our own job log for these four jobs<a class="fn" href="#p-fn1"
+    id="p-fnref1" aria-label="Footnote 1">[1]</a>.</p>
+    <h3>Municipal survey, 1987 — 34 × 8-inch CP/M floppy — closed April 2024</h3>
+    <p>Stored in a damp basement. Twenty-nine imaged first pass, four after a bake, one lost to
+    substrate separation. The city now holds the only readable copy of its own survey.</p>
+    <h3>Regional broadcaster, 1994–98 — 212 × DAT (DDS-2) — closed November 2024</h3>
+    <p>No surviving catalogue. We rebuilt the index from block headers and returned it as a
+    spreadsheet alongside the audio.</p>
+    <h3>Architecture practice, 1993 — 16 × SyQuest 44 MB — closed February 2025</h3>
+    <p>Drawings for a building now under conservation. Fifteen read clean; the last needed a donor
+    drive sourced from a collector in Utrecht.</p>
+    <h3>University research set, 2004 — 8 × LTO-2 — closed June 2025</h3>
+    <p>Written by a backup product discontinued in 2009. We read raw blocks and wrote a parser for
+    its container format; the parser is with the department under their own licence.</p>
+    <ol class="footnotes">
+      <li id="p-fn1">Disk, tape and cartridge counts are taken from our job log for the four jobs
+      described. They are not an aggregate recovery rate, and we do not publish one — the honest
+      number depends entirely on the medium and its storage history.
+      <a href="#p-fnref1" aria-label="Back to reference 1">↩</a></li>
+    </ol>
+
+    <hr>
+    <h2>Rates</h2>
+    <p>Published because being quoted after the fact is the worst part of this trade. Excluding VAT.
+    Assessment is free and is not a deposit.</p>
+    <table>
+      <thead><tr><th scope="col">Item</th><th scope="col">Basis</th><th scope="col">EUR</th></tr></thead>
+      <tbody>
+        <tr><td>Assessment and written report</td><td>per intake</td><td>0</td></tr>
+        <tr><td>Floppy imaging, 3.5" / 5.25"</td><td>per disk</td><td>18</td></tr>
+        <tr><td>Floppy imaging, 8"</td><td>per disk</td><td>34</td></tr>
+        <tr><td>Tape read, DAT / DDS / LTO</td><td>per tape</td><td>55</td></tr>
+        <tr><td>Cartridge read, Zip / Jaz / SyQuest</td><td>per cartridge</td><td>40</td></tr>
+        <tr><td>Bench work, drives</td><td>per hour</td><td>95</td></tr>
+        <tr><td>Class-100 platter transfer</td><td>per drive</td><td>480</td></tr>
+        <tr><td>Format reverse-engineering</td><td>per day</td><td>620</td></tr>
+        <tr><td>Rush handling</td><td>surcharge</td><td>+40%</td></tr>
+      </tbody>
+    </table>
+    <p>Above fifty units we quote per job, not per unit. If we recover nothing, you pay the bench
+    hours already agreed and nothing else.</p>
+
+    <hr>
+    <h2>Before you send anything</h2>
+    <ul>
+      <li>Stop using the medium. A drive that is failing gets worse every time it spins.</li>
+      <li>Do not run consumer recovery software against a disk you care about. It writes.</li>
+      <li>Do not freeze drives. That advice is from a different decade and it was wrong then.</li>
+      <li>If a disk is wet, keep it wet and tell us. Drying it is what destroys it.</li>
+    </ul>
+    <h3>Send with it</h3>
+    <ul>
+      <li>The medium, packed so it cannot move.</li>
+      <li>Anything you know about what wrote it — machine, software, year.</li>
+      <li>A note on what you actually need back.</li>
+    </ul>
+    <h3>You get back</h3>
+    <ul>
+      <li>The original medium, in the condition it arrived.</li>
+      <li>A flux or block-level archive.</li>
+      <li>Extracted files with a manifest and checksums.</li>
+      <li>A written report on whatever was unreadable.</li>
+    </ul>
+
+    <hr>
+    <h2>Contact</h2>
+    <p>Write first — we will tell you whether to send anything before you post an irreplaceable
+    object to a stranger.</p>
+    <p><a href="mailto:intake@coldstorage.example">intake@coldstorage.example</a><br>
+    +31 10 000 0000<br>
+    Maashaven Oostzijde 1, 3072 HS Rotterdam, Netherlands</p>
+    <p>Bench hours Tuesday to Friday, 09:00–17:00 CET. Intake by appointment.</p>
+
+    <button class="back" data-action="terminal" type="button">← Return to the terminal</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  root.classList.remove('no-js');
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var opts = Array.prototype.slice.call(document.querySelectorAll('.fileitem'));
+  var docs = Array.prototype.slice.call(document.querySelectorAll('.doc'));
+  var viewer = document.getElementById('viewer');
+  var index = 0;
+
+  function show(i, moveFocus) {
+    index = (i + opts.length) % opts.length;
+    opts.forEach(function (o, n) {
+      var on = n === index;
+      o.setAttribute('aria-selected', on ? 'true' : 'false');
+      o.tabIndex = on ? 0 : -1;
+    });
+    docs.forEach(function (d, n) { d.hidden = n !== index; });
+    if (moveFocus) opts[index].focus();
+    flicker();
+  }
+
+  opts.forEach(function (o, n) {
+    o.addEventListener('click', function () { show(n, false); });
+  });
+
+  // roving tabindex: the whole list is one tab stop
+  document.getElementById('files').addEventListener('keydown', function (e) {
+    var k = e.key;
+    if (k === 'ArrowDown' || k === 'ArrowRight') { e.preventDefault(); show(index + 1, true); }
+    else if (k === 'ArrowUp' || k === 'ArrowLeft') { e.preventDefault(); show(index - 1, true); }
+    else if (k === 'Home') { e.preventDefault(); show(0, true); }
+    else if (k === 'End') { e.preventDefault(); show(opts.length - 1, true); }
+    else if (k === 'Enter' || k === ' ') { e.preventDefault(); show(index, false); viewer.focus(); }
+  });
+
+  // drive LED: a flicker, not an animation. Off entirely under reduced motion.
+  var led = document.getElementById('led'), ledTimer;
+  function flicker() {
+    if (reduce.matches) { led.classList.add('on'); return; }
+    led.classList.add('on');
+    clearTimeout(ledTimer);
+    ledTimer = setTimeout(function () { led.classList.remove('on'); }, 320);
+  }
+
+  // clock, ticking, in the status bar
+  var clock = document.getElementById('clock');
+  function tick() {
+    var d = new Date();
+    clock.textContent = String(d.getHours()).padStart(2, '0') + ':' +
+                        String(d.getMinutes()).padStart(2, '0');
+  }
+  tick(); setInterval(tick, 15000);
+
+  // ── the tube ────────────────────────────────────────────────────
+  // A shadow mask, a beam sweep and phosphor noise, drawn on the GPU and
+  // composited over the document. The DOM underneath is untouched: real text,
+  // real selection, real focus rings. If any of this fails, the flat amber
+  // screen that shipped before is exactly what remains.
+  var tube = (function () {
+    var host = document.querySelector('.tube');
+    var cv = host.querySelector('canvas');
+    var gl = null, prog = null, raf = 0, running = false, t0 = 0;
+    var api = { lit: false, setRunning: function () {} };
+
+    try { gl = cv.getContext('webgl2', { alpha: true, antialias: false, premultipliedAlpha: false }); }
+    catch (e) { gl = null; }
+    if (!gl) return api;
+
+    var VS = '#version 300 es\n' +
+      'in vec2 p; out vec2 uv;' +
+      'void main(){ uv = p * 0.5 + 0.5; gl_Position = vec4(p, 0.0, 1.0); }';
+
+    var FS = '#version 300 es\n' +
+      'precision highp float;' +
+      'in vec2 uv; out vec4 o;' +
+      'uniform vec2 res; uniform float t;' +
+      // hash for phosphor grain
+      'float h(vec2 v){ return fract(sin(dot(v, vec2(12.9898, 78.233))) * 43758.5453); }' +
+      'void main(){' +
+      // barrel: bend the mask, not the text, so glyphs stay where the DOM put them
+      '  vec2 c = uv * 2.0 - 1.0;' +
+      '  float r2 = dot(c, c);' +
+      '  vec2 b = c * (1.0 + 0.028 * r2);' +
+      '  vec2 quv = b * 0.5 + 0.5;' +
+      // scanlines at device scale, softened so they never alias into moire
+      '  float line = sin(quv.y * res.y * 0.7);' +
+      '  float scan = 0.038 * max(line, 0.0);' +
+      // aperture grille: three-phase vertical stripes, very light
+      '  float g = 0.5 + 0.5 * sin(quv.x * res.x * 2.09);' +
+      '  float grille = 0.013 * g;' +
+      // one slow bright bar drifting up the tube, as an unsynced signal does
+      '  float bar = fract(quv.y + t * 0.045);' +
+      '  float roll = 0.020 * pow(1.0 - abs(bar - 0.5) * 2.0, 8.0);' +
+      // phosphor grain, resampled every frame
+      '  float n = (h(floor(quv * res * 0.6) + t * 60.0) - 0.5) * 0.018;' +
+      // amber phosphor: the same face colour the chrome uses
+      '  vec3 amber = vec3(1.0, 0.69, 0.0);' +
+      '  float e = scan + grille + roll + n;' +
+      // beyond the bent edge there is no raster at all
+      '  float inside = step(max(abs(b.x), abs(b.y)), 1.0);' +
+      '  o = vec4(amber * max(e, 0.0) * inside, 1.0);' +
+      '}';
+
+    function sh(type, src) {
+      var s = gl.createShader(type);
+      gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { gl.deleteShader(s); return null; }
+      return s;
+    }
+    var vs = sh(gl.VERTEX_SHADER, VS), fs = sh(gl.FRAGMENT_SHADER, FS);
+    if (!vs || !fs) return api;
+    prog = gl.createProgram();
+    gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return api;
+    gl.useProgram(prog);
+
+    var buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    var loc = gl.getAttribLocation(prog, 'p');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    var uRes = gl.getUniformLocation(prog, 'res');
+    var uT = gl.getUniformLocation(prog, 't');
+
+    function size() {
+      // capped DPR: the mask is a texture-space effect, not a detail one
+      var d = Math.min(window.devicePixelRatio || 1, 1.75);
+      var w = Math.round(cv.clientWidth * d), h = Math.round(cv.clientHeight * d);
+      if (cv.width !== w || cv.height !== h) {
+        cv.width = w; cv.height = h;
+        gl.viewport(0, 0, w, h);
+        gl.uniform2f(uRes, w, h);
+      }
+    }
+    function frame(now) {
+      if (!running) return;
+      if (!t0) t0 = now;
+      size();
+      gl.uniform1f(uT, (now - t0) / 1000);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      raf = requestAnimationFrame(frame);
+    }
+    api.setRunning = function (on) {
+      // nothing renders behind the plain document or an inactive tab
+      if (on === running) return;
+      running = on;
+      if (on) { raf = requestAnimationFrame(frame); }
+      else { cancelAnimationFrame(raf); raf = 0; }
+    };
+
+    document.body.classList.add('tube-on');
+    api.lit = true;
+    size();
+
+    if (reduce.matches) {
+      // one still frame: the phosphor screen without the moving beam
+      gl.uniform1f(uT, 0);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    } else {
+      api.setRunning(true);
+    }
+    window.addEventListener('resize', size, { passive: true });
+    document.addEventListener('visibilitychange', function () {
+      if (reduce.matches) return;
+      api.setRunning(!document.hidden && !document.body.classList.contains('plain-on'));
+    });
+    return api;
+  })();
+
+  // power-on, once, only when the artifact is what you are actually looking at
+  var wantsPlain = false;
+  try { wantsPlain = localStorage.getItem('cs-plain') === '1'; } catch (e) {}
+  if (tube.lit && !reduce.matches && !wantsPlain) {
+    document.body.classList.add('booting', 'typing');
+    setTimeout(function () { document.body.classList.remove('booting'); }, 640);
+    setTimeout(function () { document.body.classList.remove('typing'); }, 1900);
+  }
+
+  // ── the escape hatch, both directions, remembered ───────────────
+  function setPlain(on, focusTarget) {
+    // going to the plain document, the beam collapses first; coming back, the
+    // raster opens again. Both are decoration over a toggle that already works.
+    if (tube.lit && !reduce.matches && focusTarget) {
+      if (on) {
+        document.body.classList.add('collapsing');
+        setTimeout(function () {
+          document.body.classList.remove('collapsing');
+          commitPlain(true, focusTarget);
+        }, 300);
+        return;
+      }
+      commitPlain(false, focusTarget);
+      document.body.classList.add('booting');
+      setTimeout(function () { document.body.classList.remove('booting'); }, 640);
+      return;
+    }
+    commitPlain(on, focusTarget);
+  }
+  function commitPlain(on, focusTarget) {
+    document.body.classList.toggle('plain-on', on);
+    tube.setRunning(!on);
+    try { localStorage.setItem('cs-plain', on ? '1' : '0'); } catch (e) {}
+    if (focusTarget) {
+      var t = on ? document.querySelector('.plain .back') : document.querySelector('.statusbar .key[data-action="plain"]');
+      if (t) t.focus();
+    }
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-action]');
+    if (!b) return;
+    var a = b.getAttribute('data-action');
+    if (a === 'plain') setPlain(true, true);
+    if (a === 'terminal') setPlain(false, true);
+    if (a === 'next') show(index + 1, false);
+    if (a === 'prev') show(index - 1, false);
+  });
+  try { if (localStorage.getItem('cs-plain') === '1') setPlain(true, false); } catch (e) {}
+
+  // function keys, with click equivalents already on the status bar
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'F9') { e.preventDefault(); setPlain(!document.body.classList.contains('plain-on'), true); }
+    if (e.key === 'F6') { e.preventDefault(); show(index + 1, false); }
+    if (e.key === 'F5' && e.shiftKey === false && e.ctrlKey === false) { /* leave reload alone */ }
+    if (e.key === 'Escape' && document.body.classList.contains('plain-on')) setPlain(false, true);
+  });
+
+  // ── screensaver: idle only, never under reduced motion, no focus theft ──
+  var saver = document.getElementById('saver'), idle;
+  function sleep() { if (!reduce.matches && !document.body.classList.contains('plain-on')) saver.classList.add('on'); }
+  function wake() {
+    saver.classList.remove('on');
+    clearTimeout(idle);
+    if (!reduce.matches) idle = setTimeout(sleep, 60000);
+  }
+  ['mousemove', 'keydown', 'pointerdown', 'wheel', 'touchstart'].forEach(function (ev) {
+    window.addEventListener(ev, wake, { passive: true });
+  });
+  wake();
+
+  show(0, false);
+}());
+</script>
+</body>
+</html>

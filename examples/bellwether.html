@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bellwether Fabrication — miniature sets, puppets and practical effects, Bristol</title>
+<meta name="description" content="Bellwether Fabrication builds miniature sets, puppets and practical effects for stop-motion features and commercials. Bristol, since 2009.">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   STUDIO register.
+   Four faces, four jobs. One accent, cursor and micro-marks only.
+   Chapters flip #000 ↔ #fff. No container. 12px gutters.
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --c-bg-primary:     #000;
+  --c-bg-secondary:   #fff;
+  --c-bg-tertiary:    #161616;
+  --c-font-primary:   #000;
+  --c-font-secondary: #fff;
+  --c-border-default: #636262;
+  --c-border-grid:    #4141413B;
+
+  --c-brand-primary:  #5B4BFF;   /* cursor dot + micro-marks. Nothing else. */
+
+  --side-gutters: 0.75rem;       /* 12px */
+  --header-height: 77px;
+  scroll-padding-block-start: 77px;   /* nav jumps clear the fixed masthead */
+  --anim-default-time: .75s;
+  --anim-default-delay: .27s;
+
+  /* four faces, four jobs */
+  --font-title:      "Arial Black", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-text:       system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-cursive:    Georgia, "Times New Roman", serif;
+  --font-typewriter: ui-monospace, "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
+
+  /* scale — desktop end of each clamp; tracking always in em */
+  --t-hero:   clamp(56px, 12.2vw, 176px);
+  --t-serif:  clamp(40px, 8.6vw, 124px);   /* chapter opener — never the hero's rival */
+  --t-row:    clamp(32px, 5.4vw, 60px);
+  --t-lead:   clamp(19px, 1.9vw, 22px);
+  --t-body:   clamp(16px, 1.35vw, 18px);
+  --t-label:  clamp(14px, 1.2vw, 16.5px);
+  --t-mono:   16px;
+  --t-cap:    14px;
+
+  /* four intervals, four jobs — steps far enough apart to be read as steps.
+     --s-bind is the only one small enough to say "these belong together". */
+  --s-bind:   12px;
+  --s-group:  48px;
+  --s-open:   96px;
+  --s-poster: 160px;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--c-bg-primary);
+  color: var(--c-font-secondary);
+  font: 400 var(--t-body)/1.2 var(--font-text);
+  letter-spacing: -0.015em;
+  /* no body-level overflow clamp: the marquee clips itself, and a future
+     overflow regression should be able to announce itself */
+}
+h1, h2, h3, p, ul, ol, figure { margin: 0; }
+ul { list-style: none; padding: 0; }
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid var(--c-brand-primary); outline-offset: 3px; }
+img, .plate { display: block; inline-size: 100%; }
+
+/* chapters ─────────────────────────────────────────────────── */
+.chapter { padding-inline: var(--side-gutters); position: relative; }
+.chapter--light { background: var(--c-bg-secondary); color: var(--c-font-primary);   --ink: #000; }
+.chapter--dark  { background: var(--c-bg-primary);   color: var(--c-font-secondary); --ink: #fff; }
+.chapter--off   { background: var(--c-bg-tertiary);  color: var(--c-font-secondary); --ink: #fff; }
+
+/* faces by role ────────────────────────────────────────────── */
+.title { font-family: var(--font-title); font-weight: 900; letter-spacing: -0.01em; line-height: .84; }
+.mono  { font-family: var(--font-typewriter); font-size: var(--t-cap); font-weight: 500;
+         letter-spacing: normal; line-height: 1; text-transform: uppercase; }
+.label { font-family: var(--font-text); font-weight: 500; font-size: var(--t-label);
+         letter-spacing: -0.019em; text-transform: uppercase; line-height: 1.2; }
+
+/* header ───────────────────────────────────────────────────── */
+.masthead {
+  position: fixed; inset-block-start: 0; inset-inline: 0; z-index: 40;
+  block-size: var(--header-height);
+  display: flex; align-items: center; gap: 24px;
+  padding-inline: var(--side-gutters);
+  color: var(--c-font-secondary);
+  mix-blend-mode: difference;      /* inverts against whatever chapter is behind */
+  pointer-events: none;
+}
+.masthead * { pointer-events: auto; }
+.masthead nav { margin-inline-start: auto; display: flex; gap: 12px; }
+/* WCAG 2.2 2.5.8 — 24×24 hit area without changing the 14px type */
+.masthead nav a { display: inline-flex; align-items: center; justify-content: center;
+                  min-block-size: 24px; min-inline-size: 24px; padding-inline: 4px; }
+
+/* 1 · hero ─────────────────────────────────────────────────── */
+.hero { min-block-size: 100svh; display: grid; align-content: end;
+        padding-block: var(--header-height) 46px; overflow: clip; }
+.hero__field {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(78% 62% at 22% 26%, #6d5946 0%, #3b3128 34%, #1a1613 62%, #0a0908 100%),
+    linear-gradient(196deg, #2a231c 0%, #000 78%);
+}
+.hero__field::after {           /* drawn grain — no asset, no request */
+  content: ""; position: absolute; inset: 0; opacity: .22; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/></filter><rect width='120' height='120' filter='url(%23n)' opacity='.5'/></svg>");
+}
+.hero > *:not(.hero__field) { position: relative; z-index: 1; }
+.hero h1 { font-size: var(--t-hero); }
+.hero__facts { display: flex; flex-wrap: wrap; gap: 6px 34px; margin-block-start: 22px; }
+.hero__facts li { opacity: .82; }
+
+/* 2 · manifesto ────────────────────────────────────────────── */
+.manifesto { padding-block: var(--s-poster); }
+.manifesto p { font-size: var(--t-lead); font-weight: 500; line-height: 1;
+               letter-spacing: -0.015em; text-transform: uppercase; max-inline-size: 30ch; }
+
+/* 3 · capabilities ─────────────────────────────────────────── */
+.caps { padding-block: var(--s-open) var(--s-poster); }
+.collide { position: relative; font-size: clamp(44px, 9.1vw, 130px); line-height: .84; }
+.collide .solid { position: relative; z-index: 1; }
+.collide .ghost {
+  position: absolute; inset-block-start: -.17em; inset-inline-start: .3em; z-index: 0;
+  -webkit-text-stroke: 2px var(--ink, #fff); color: transparent; opacity: .72;
+}
+.caps ul { margin-block-start: var(--s-group); display: flex; flex-wrap: wrap; gap: 10px 26px; }
+.caps li { font-size: var(--t-label); font-weight: 500; text-transform: uppercase;
+           letter-spacing: -0.019em; }
+
+/* 4 · numbered rows ────────────────────────────────────────── */
+.rows { padding-block: var(--s-open); }
+/* the plate sits at the far edge so a row's title and its own keywords are
+   neighbours; every child is placed, never auto-placed around a hidden one */
+.row { display: grid; grid-template-columns: 5.5ch 1fr 1fr 240px;
+       gap: var(--s-bind) 24px; align-items: start; padding-block: var(--s-group);
+       border-block-start: 1px solid var(--c-border-default); }
+.row:last-child { border-block-end: 1px solid var(--c-border-default); }
+.row > span.mono { grid-column: 1; }   /* the number only — the keyword list is .mono too */
+.row h3        { grid-column: 2; }
+.row__keys     { grid-column: 3; }
+.row .plate    { grid-column: 4; }
+.row h3 { font-size: var(--t-row); font-weight: 500; line-height: .88; letter-spacing: -0.015em; }
+.row__keys { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.row .plate { block-size: 132px; }
+
+/* drawn plates: graded fields standing in for bench photography */
+.plate { background: linear-gradient(158deg, #2a2a2a, #0d0d0d 62%); position: relative; overflow: hidden; }
+.plate--light { background: linear-gradient(158deg, #dcdcd6, #b6b6ae 62%); }
+
+/* drawn plates vary like bench shots do — different lamp, different bench */
+.grid figure:nth-of-type(5n+1) .plate { background: radial-gradient(70% 60% at 26% 22%, #6b5a45, #241d16 58%, #0c0a08); }
+.grid figure:nth-of-type(5n+2) .plate { background: radial-gradient(80% 70% at 72% 30%, #4a5560, #1b2026 60%, #090a0c); }
+.grid figure:nth-of-type(5n+3) .plate { background: linear-gradient(200deg, #5b4a3a, #191410 66%, #0a0806); }
+.grid figure:nth-of-type(5n+4) .plate { background: radial-gradient(64% 74% at 40% 74%, #55524a, #1d1b18 62%, #0b0a09); }
+.grid figure:nth-of-type(5n+5) .plate { background: linear-gradient(146deg, #3f4a44, #141917 64%, #080a09); }
+.plate::after {
+  content: ""; position: absolute; inset: 0; opacity: .3; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2'/></filter><rect width='90' height='90' filter='url(%23n)' opacity='.55'/></svg>");
+}
+
+/* 5 · case grid ────────────────────────────────────────────── */
+.cases { padding-block: var(--s-open) var(--s-poster); }
+.cases__head { display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: baseline;
+               margin-block-end: var(--s-group); }
+.cases__head h2 { font-size: var(--t-row); font-weight: 500; line-height: .88; letter-spacing: -0.015em; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.grid > figure { display: block; margin: 0; }
+.case { display: block; inline-size: 100%; border: 0; background: none; padding: 0;
+        text-align: start; color: inherit; font: inherit; letter-spacing: inherit; cursor: pointer; }
+.case .plate { aspect-ratio: 4 / 3; }
+/* a title and its year are one label; the 12px grid gutter stays the largest
+   local interval, and it belongs between cards, not inside one */
+.case figcaption { display: flex; justify-content: flex-start; gap: var(--s-bind);
+                   margin-block-start: 10px; }
+.case[aria-expanded="true"] figcaption { text-decoration: underline; text-underline-offset: 3px; }
+.case__panel { grid-column: 1 / -1; padding: 22px 0 34px;
+               border-block-start: 1px solid var(--c-border-default); }
+.case__panel[hidden] { display: none; }
+.case__panel p { font-size: var(--t-body); line-height: 1.2; max-inline-size: 62ch; margin-block-start: 12px; }
+
+/* 6 · CTA ──────────────────────────────────────────────────── */
+.cta { padding-block: var(--s-poster); text-align: center; position: relative; }
+.cta .ask { font-family: var(--font-cursive); font-style: italic; font-weight: 300;
+            font-size: clamp(34px, 6vw, 84px); line-height: 1; letter-spacing: -0.01em; }
+.cta .tell { font-size: var(--t-serif); margin-block-start: .06em; }
+.cta .arc { position: absolute; inset-block-start: 50%; inline-size: clamp(40px, 7vw, 96px);
+            aspect-ratio: 1; border: 1px solid var(--c-brand-primary); border-radius: 50%;
+            clip-path: inset(0 50% 0 0); translate: 0 -50%; }
+.cta .arc--l { inset-inline-start: 4vw; }
+.cta .arc--r { inset-inline-end: 4vw; rotate: 180deg; }
+
+/* 7 · clients ──────────────────────────────────────────────── */
+.clients { padding-block: var(--s-open) var(--s-group); }
+.sector { display: grid; grid-template-columns: 22ch 1fr; gap: 18px 32px;
+          padding-block: var(--s-group); border-block-start: 1px solid var(--c-border-default); }
+.sector h3::before { content: "▪"; color: var(--c-brand-primary); margin-inline-end: 10px; }
+.sector ul { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+.sector li { font-size: var(--t-label); font-weight: 500; letter-spacing: -0.019em; }
+
+/* marquee */
+.marquee { overflow: hidden; padding-block: var(--s-group) 0; }
+.marquee__track { display: flex; gap: 48px; inline-size: max-content;
+                  animation: run 38s linear infinite; }
+.marquee span { font-family: var(--font-title); font-weight: 900; font-size: clamp(28px, 4.4vw, 62px);
+                line-height: 1; letter-spacing: -0.01em; -webkit-text-stroke: 1.5px var(--ink, #000);
+                color: transparent; white-space: nowrap; }
+@keyframes run { to { transform: translateX(-50%); } }
+
+/* 8 · footer ───────────────────────────────────────────────── */
+.foot { padding-block: var(--s-open) var(--s-group); display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+.foot .years { font-size: clamp(44px, 9.1vw, 128px); }
+.foot__right { display: flex; flex-direction: column; gap: 14px; align-items: start; }
+.foot__right ul { display: flex; flex-wrap: wrap; gap: 6px 20px; }
+/* WCAG 2.2 2.5.8 — 24px tall hit areas in the footer */
+.foot a { display: inline-flex; align-items: center; min-block-size: 24px; }
+.foot__bottom { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px 28px;
+                margin-block-start: 52px; opacity: .7; }
+
+/* cursor ───────────────────────────────────────────────────── */
+.cursor { position: fixed; z-index: 60; inline-size: 10px; block-size: 10px; border-radius: 50%;
+          background: var(--c-brand-primary); pointer-events: none; translate: -50% -50%;
+          transition: scale .18s ease; display: none; }
+.cursor.on { display: block; }
+.cursor.big { scale: 2.6; }
+
+/* reveals ──────────────────────────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(14px);
+          transition: opacity var(--anim-default-time) ease, transform var(--anim-default-time) ease; }
+.reveal.in { opacity: 1; transform: none; }
+.char { display: inline-block; opacity: 0; transform: translateY(.16em);
+        transition: opacity .6s ease, transform .6s ease; }
+.char.in { opacity: 1; transform: none; }
+
+/* small end ────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .row { grid-template-columns: 4ch 1fr; }
+  .row h3, .row__keys { grid-column: 2; }
+  .row .plate { display: none; }
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  .sector { grid-template-columns: 1fr; }
+  .foot { grid-template-columns: 1fr; }
+}
+@media (max-width: 380px) {
+  :root { --side-gutters: 1.25rem; }   /* type stops running to the edge */
+  .grid { grid-template-columns: 1fr; }
+}
+/* the masthead wraps to two lines on narrow screens; the hero gives it room
+   rather than letting difference-blend text sit on the facts list */
+@media (max-width: 420px) {
+  .hero { padding-block-end: var(--s-group); }
+  .hero__facts { margin-block-start: var(--s-bind); }
+  .caps ul { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; }
+}
+
+/* ═══ the projector ══════════════════════════════════════════════
+   Scroll drives one continuous idea: the bench field recedes, and each
+   chapter's ink arrives as a wipe rather than a cut. CSS-only, scroll-
+   timeline; where that is unsupported the page renders exactly as before.
+   ═════════════════════════════════════════════════════════════ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+
+    /* 1 · the field pushes back as the hero leaves — the camera move */
+    .hero__field {
+      animation: field-push linear both;
+      animation-duration: auto;   /* scroll-driven: the range is the duration */
+      /* mapped to the first viewport of root scroll: progress 0 at the top,
+         1 when the hero has been travelled through. View-timeline ranges put
+         the whole move after the hero had already gone. */
+      animation-timeline: scroll(root block);
+      animation-range: 0 100svh;
+      will-change: transform, filter;
+    }
+    @keyframes field-push {
+      from { transform: scale(1.12) translateY(0); filter: brightness(1); }
+      to   { transform: scale(1) translateY(-7%); filter: brightness(.55); }
+    }
+
+    /* the hero's own type holds still, then releases — the field moves
+       under it, which is what makes the push read as a camera and not a zoom */
+    .hero h1 {
+      animation: hero-hold linear both;
+      animation-duration: auto;
+      animation-timeline: scroll(root block);
+      animation-range: 0 100svh;
+    }
+    @keyframes hero-hold {
+      from { transform: none; opacity: 1; }
+      to   { transform: translateY(-14%); opacity: .35; }
+    }
+
+    /* 2 · chapter ink arrives as a wipe. The bar carries the *incoming*
+       chapter's ground colour and clears itself across the seam. */
+    .chapter { view-timeline-name: --ch; view-timeline-axis: block; }
+    /* the hero is exempt: it already has the camera push, and its field is
+       an absolutely-positioned child that a stacking rule here would break */
+    .chapter:not(.hero)::before {
+      content: ""; position: absolute; inset-block-start: 0; inset-inline: 0;
+      block-size: 100%; z-index: -1; pointer-events: none;
+      background: currentColor; opacity: .06;
+      animation: ink-wipe linear both;
+      animation-duration: auto;
+      animation-timeline: --ch;
+      animation-range: entry 0% entry 92%;
+    }
+    @keyframes ink-wipe {
+      from { clip-path: inset(0 0 0 0); }
+      to   { clip-path: inset(0 0 0 100%); }
+    }
+
+    /* 3 · the marquee keeps its own clock; scroll position only opens its
+       tracking out, so the band loosens as the reader travels */
+    .marquee__track {
+      animation: run 18s linear infinite, marquee-drift linear both;
+      animation-timeline: auto, scroll(root block);
+      animation-duration: 18s, auto;
+    }
+    @keyframes marquee-drift {
+      from { letter-spacing: -0.02em; }
+      to   { letter-spacing: 0.06em; }
+    }
+  }
+}
+
+/* case panels morph out of the card that opened them, where supported */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-group(*) { animation-duration: .42s; }
+  ::view-transition-old(case-panel), ::view-transition-new(case-panel) {
+    animation-timing-function: cubic-bezier(.16, .84, .3, 1);
+  }
+}
+
+/* every effect above, cancelled ────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal, .char { opacity: 1; transform: none; transition: none; }
+  .marquee__track { animation: none; flex-wrap: wrap; inline-size: auto; }
+  .cursor { display: none !important; }
+  * { transition-duration: .01ms !important; }
+}
+.no-js .reveal, .no-js .char { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<header class="masthead mono">
+  <span>Bellwether Fabrication</span>
+  <nav aria-label="Sections">
+    <a href="#work">Work</a>
+    <a href="#capabilities">Capabilities</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- 1 · hero — drawn field standing in for the bench reel -->
+  <section class="chapter chapter--dark hero">
+    <div class="hero__field" aria-hidden="true"></div>
+    <h1 class="title" data-split>Bellwether</h1>
+    <ul class="hero__facts mono">
+      <li>Miniature sets · puppets · practical effects</li>
+      <li>Est. 2009</li>
+      <li>Bristol, UK</li>
+    </ul>
+  </section>
+
+  <!-- 2 · manifesto — first chapter flip -->
+  <section class="chapter chapter--light manifesto">
+    <p class="reveal">We build the thing itself, at one-twelfth scale, so the camera has something
+    real to look at. Everything on set can be touched, lit, broken and shot again tomorrow.</p>
+  </section>
+
+  <!-- 3 · capabilities -->
+  <section class="chapter chapter--dark caps" id="capabilities">
+    <h2 class="collide title reveal">
+      <span class="ghost" aria-hidden="true">Bench</span>
+      <span class="solid">Bench</span>
+    </h2>
+    <ul class="reveal">
+      <li>Armature design</li><li>Silicone puppet casting</li><li>Replacement-face libraries</li>
+      <li>3D-printed face sets</li><li>Foam latex</li><li>Miniature architecture</li>
+      <li>Forced-perspective builds</li><li>Scenic painting</li><li>Water and smoke effects</li>
+      <li>Practical fire rigs</li><li>Motion-control mounts</li><li>Rain bars</li>
+      <li>Breakaway props</li><li>Scale dressing</li><li>Textile and costume at scale</li>
+      <li>Mould making</li><li>Rigging and tie-downs</li><li>On-set maintenance</li>
+    </ul>
+  </section>
+
+  <!-- 4 · numbered rows -->
+  <section class="chapter chapter--light rows">
+    <div class="row reveal">
+      <span class="mono">(01)</span>
+      <h3>Miniature sets</h3>
+      <div class="plate plate--light" aria-hidden="true"></div>
+      <ul class="row__keys mono"><li>1:12 standard</li><li>Modular walls</li><li>Camera access</li></ul>
+    </div>
+    <div class="row reveal">
+      <span class="mono">(02)</span>
+      <h3>Puppet fabrication</h3>
+      <div class="plate plate--light" aria-hidden="true"></div>
+      <ul class="row__keys mono"><li>Ball-and-socket</li><li>Silicone skins</li><li>Face sets</li></ul>
+    </div>
+    <div class="row reveal">
+      <span class="mono">(03)</span>
+      <h3>Practical effects</h3>
+      <div class="plate plate--light" aria-hidden="true"></div>
+      <ul class="row__keys mono"><li>Water</li><li>Smoke</li><li>Fire rigs</li></ul>
+    </div>
+    <div class="row reveal">
+      <span class="mono">(04)</span>
+      <h3>Shoot support</h3>
+      <div class="plate plate--light" aria-hidden="true"></div>
+      <ul class="row__keys mono"><li>On-set crew</li><li>Repairs</li><li>Continuity spares</li></ul>
+    </div>
+  </section>
+
+  <!-- 5 · case grid, panels pre-rendered -->
+  <section class="chapter chapter--off cases" id="work">
+    <div class="cases__head">
+      <h2>Selected work</h2>
+      <p class="mono">Features (4) &nbsp; Commercials (3) &nbsp; Broadcast (2)</p>
+    </div>
+
+    <div class="grid" id="grid">
+      <figure><button class="case" aria-expanded="false" aria-controls="p1">
+        <span class="plate" aria-hidden="true"></span>
+        <figcaption class="mono"><span>The Salt House</span><span>2024</span></figcaption>
+      </button></figure>
+      <div class="case__panel" id="p1" hidden>
+        <p class="mono">The Salt House · feature · 1:12 · 14 sets · 2024</p>
+        <p>A tidal village built on rollers so the whole street could be flooded to the doorstep and
+        drained overnight. Fourteen sets, nine of them rebuilt at least once during the shoot.</p>
+      </div>
+      <figure><button class="case" aria-expanded="false" aria-controls="p2">
+        <span class="plate" aria-hidden="true"></span>
+        <figcaption class="mono"><span>Nettlefield</span><span>2024</span></figcaption>
+      </button></figure>
+      <div class="case__panel" id="p2" hidden>
+        <p class="mono">Nettlefield · feature · 1:12 · 22 puppets · 2024</p>
+        <p>Twenty-two puppets with replacement-face libraries of 340 pieces, printed in-house and
+        hand-finished. Two spare bodies per principal, which is what got the shoot to picture lock.</p>
+      </div>
+      <figure><button class="case" aria-expanded="false" aria-controls="p3">
+        <span class="plate" aria-hidden="true"></span>
+        <figcaption class="mono"><span>Ferrous</span><span>2023</span></figcaption>
+      </button></figure>
+      <div class="case__panel" id="p3" hidden>
+        <p class="mono">Ferrous · commercial · 1:6 · 3 weeks · 2023</p>
+        <p>A foundry interior at 1:6 with practical fire, shot in-camera because the client wanted
+        the sparks to sit behind the smoke rather than in front of it.</p>
+      </div>
+      <figure><button class="case" aria-expanded="false" aria-controls="p4">
+        <span class="plate" aria-hidden="true"></span>
+        <figcaption class="mono"><span>Harrow &amp; Vine</span><span>2023</span></figcaption>
+      </button></figure>
+      <div class="case__panel" id="p4" hidden>
+        <p class="mono">Harrow &amp; Vine · commercial · 1:12 · 2 sets · 2023</p>
+        <p>A greengrocer's shop with 1,400 individually dressed items of stock, because the board
+        called for a slow push-in and there was nowhere to hide.</p>
+      </div>
+      <figure><button class="case" aria-expanded="false" aria-controls="p5">
+        <span class="plate" aria-hidden="true"></span>
+        <figcaption class="mono"><span>Low Tide</span><span>2022</span></figcaption>
+      </button></figure>
+      <div class="case__panel" id="p5" hidden>
+        <p class="mono">Low Tide · broadcast · 1:12 · 6 sets · 2022</p>
+        <p>Six harbour sets on a rolling water table, with a rain bar rigged above the camera so the
+        drops read at scale rather than as falling marbles.</p>
+      </div>
+      <figure><button class="case" aria-expanded="false" aria-controls="p6">
+        <span class="plate" aria-hidden="true"></span>
+        <figcaption class="mono"><span>The Orrery</span><span>2022</span></figcaption>
+      </button></figure>
+      <div class="case__panel" id="p6" hidden>
+        <p class="mono">The Orrery · feature · 1:8 · 1 hero build · 2022</p>
+        <p>A working brass orrery, geared so it could be driven a frame at a time and land on the
+        same position after a week of shooting.</p>
+      </div>
+      <figure><button class="case" aria-expanded="false" aria-controls="p7">
+        <span class="plate" aria-hidden="true"></span>
+        <figcaption class="mono"><span>Pilgrim Street</span><span>2021</span></figcaption>
+      </button></figure>
+      <div class="case__panel" id="p7" hidden>
+        <p class="mono">Pilgrim Street · broadcast · 1:12 · 11 sets · 2021</p>
+        <p>A terrace built to be shot from both sides, with removable ceilings and a lighting grid
+        the gaffer could reach without a ladder.</p>
+      </div>
+      <figure><button class="case" aria-expanded="false" aria-controls="p8">
+        <span class="plate" aria-hidden="true"></span>
+        <figcaption class="mono"><span>Cinderheart</span><span>2020</span></figcaption>
+      </button></figure>
+      <div class="case__panel" id="p8" hidden>
+        <p class="mono">Cinderheart · feature · 1:12 · 18 puppets · 2020</p>
+        <p>Eighteen puppets in foam latex over ball-and-socket armatures, with silicone hands cast
+        thin enough to hold a match.</p>
+      </div>
+      <figure><button class="case" aria-expanded="false" aria-controls="p9">
+        <span class="plate" aria-hidden="true"></span>
+        <figcaption class="mono"><span>Marlowe's Ark</span><span>2019</span></figcaption>
+      </button></figure>
+      <div class="case__panel" id="p9" hidden>
+        <p class="mono">Marlowe's Ark · commercial · 1:24 · 1 set · 2019</p>
+        <p>A ship's hull at 1:24, forced-perspective to read at three times its length, on a gimbal
+        driven by hand between frames.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · CTA — the one serif moment on the page -->
+  <section class="chapter chapter--dark cta" id="contact">
+    <span class="arc arc--l" aria-hidden="true"></span>
+    <span class="arc arc--r" aria-hidden="true"></span>
+    <p class="ask">Got something to build?</p>
+    <p class="tell title">Bring it to the bench</p>
+  </section>
+
+  <!-- 7 · clients -->
+  <section class="chapter chapter--light clients">
+    <div class="sector">
+      <h3 class="label">Features</h3>
+      <ul><li>Larkfield Pictures</li><li>Two Rivers</li><li>Hollow Lane Films</li><li>Ardent</li></ul>
+    </div>
+    <div class="sector">
+      <h3 class="label">Commercials</h3>
+      <ul><li>Verge</li><li>Copperline</li><li>Studio Mallow</li></ul>
+    </div>
+    <div class="sector">
+      <h3 class="label">Broadcast</h3>
+      <ul><li>Nine Oaks</li><li>Torrent Media</li></ul>
+    </div>
+
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee__track">
+        <span>Armatures — Silicone — Scenic — Water — Fire — Scale dressing —</span>
+        <span>Armatures — Silicone — Scenic — Water — Fire — Scale dressing —</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- 8 · footer -->
+<footer class="chapter chapter--dark foot">
+  <div>
+    <p class="years title">09-26</p>
+    <p class="mono" style="margin-block-start:14px">© Bellwether Fabrication</p>
+  </div>
+  <div class="foot__right">
+    <p class="mono">Unit 4, Whitehouse Yard · Bristol BS3 · UK</p>
+    <p class="mono"><a href="mailto:bench@bellwether.example">bench@bellwether.example</a> · +44 117 000 0000</p>
+    <p class="mono">Crew</p>
+    <ul class="mono">
+      <li>R. Aldous — fabrication lead</li><li>M. Okonjo — armatures</li>
+      <li>S. Petrie — scenic</li><li>J. Vale — moulds &amp; casting</li><li>K. Iwu — on-set</li>
+    </ul>
+  </div>
+  <div class="foot__bottom mono">
+    <span>Bench hours Mon–Fri 08:00–18:00</span>
+    <span>Visits by appointment</span>
+  </div>
+</footer>
+
+<div class="cursor" id="cursor" aria-hidden="true"></div>
+
+<script>
+(function () {
+  document.documentElement.classList.remove('no-js');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  /* 1 · character-level reveal on the wordmark — spans + delay, no library */
+  var h = document.querySelector('[data-split]');
+  if (h && !reduce.matches) {
+    var text = h.textContent, frag = document.createDocumentFragment();
+    h.setAttribute('aria-label', text);
+    text.split('').forEach(function (ch, i) {
+      var s = document.createElement('span');
+      s.className = 'char'; s.textContent = ch; s.setAttribute('aria-hidden', 'true');
+      s.style.transitionDelay = (i * 0.045) + 's';
+      frag.appendChild(s);
+    });
+    h.textContent = ''; h.appendChild(frag);
+    requestAnimationFrame(function () {
+      h.querySelectorAll('.char').forEach(function (c) { c.classList.add('in'); });
+    });
+  }
+
+  /* 2 · section reveals — IntersectionObserver, 0.27s stagger */
+  var reveals = document.querySelectorAll('.reveal');
+  if (reduce.matches || !('IntersectionObserver' in window)) {
+    reveals.forEach(function (r) { r.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e, n) {
+        if (!e.isIntersecting) return;
+        e.target.style.transitionDelay = (n * 0.27) + 's';
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      });
+    }, { rootMargin: '0px 0px -12% 0px' });
+    reveals.forEach(function (r) { io.observe(r); });
+    /* three chapters have .reveal on their only content. If the observer never
+       fires — print, some webviews — the page must not stay blank. */
+    setTimeout(function () {
+      reveals.forEach(function (r) { r.classList.add('in'); });
+    }, 2000);
+  }
+
+  /* 3 · case panels — pre-rendered, revealed, one open at a time */
+  document.getElementById('grid').addEventListener('click', function (e) {
+    var b = e.target.closest('.case');
+    if (!b) return;
+    var panel = document.getElementById(b.getAttribute('aria-controls'));
+    var open = b.getAttribute('aria-expanded') === 'true';
+
+    function swap() {
+      document.querySelectorAll('.case[aria-expanded="true"]').forEach(function (o) {
+        o.setAttribute('aria-expanded', 'false');
+        document.getElementById(o.getAttribute('aria-controls')).hidden = true;
+      });
+      if (!open) { b.setAttribute('aria-expanded', 'true'); panel.hidden = false; }
+    }
+
+    // the panel takes the outgoing panel's identity, so the browser morphs one
+    // into the other instead of cutting. Unsupported: the swap just happens.
+    if (!document.startViewTransition || reduce.matches) { swap(); return; }
+    panel.style.viewTransitionName = 'case-panel';
+    var t = document.startViewTransition(swap);
+    t.finished.finally(function () { panel.style.viewTransitionName = ''; });
+  });
+
+  /* 4 · cursor dot — decoration only; nothing is communicated by it alone */
+  var cur = document.getElementById('cursor');
+  if (!reduce.matches && window.matchMedia('(pointer: fine)').matches) {
+    window.addEventListener('pointermove', function (e) {
+      cur.classList.add('on');
+      cur.style.left = e.clientX + 'px';
+      cur.style.top = e.clientY + 'px';
+    }, { passive: true });
+    document.addEventListener('pointerover', function (e) {
+      cur.classList.toggle('big', !!e.target.closest('a, button'));
+    });
+  }
+}());
+</script>
+</body>
+</html>
